@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>模力通 · 热搜预警原型</title>
+  <title>模力通 · 办公智能体原型</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,8 +22,8 @@
             inter: ['Inter', 'ui-sans-serif', 'system-ui']
           },
           boxShadow: {
-            soft: '0 18px 60px rgba(15, 23, 42, 0.08)',
-            hairline: '0 0 0 1px rgba(15, 23, 42, 0.06)'
+            soft: '0 22px 70px rgba(15, 23, 42, 0.08)',
+            hairline: '0 0 0 1px rgba(15, 23, 42, 0.07)'
           }
         }
       }
@@ -31,40 +31,48 @@
   </script>
   <style>
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 10% 0%, rgba(0, 160, 223, 0.08), transparent 28rem),
-        linear-gradient(180deg, #fbfbfa 0%, #f5f5f3 100%);
+        radial-gradient(circle at 8% 0%, rgba(0, 160, 223, 0.10), transparent 28rem),
+        radial-gradient(circle at 92% 10%, rgba(23, 23, 23, 0.05), transparent 26rem),
+        linear-gradient(180deg, #fbfbfa 0%, #f5f5f2 100%);
       color: #171717;
     }
     .glass {
-      background: rgba(255, 255, 255, 0.84);
+      background: rgba(255, 255, 255, 0.82);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
     }
     .panel {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 20px 55px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 18px 58px rgba(15, 23, 42, 0.06);
     }
-    .nav-item.active {
-      background: #eef9fd;
+    .nav-item.active,
+    .mode-card.active {
+      background: #eaf8fe;
       color: #007fb5;
-      box-shadow: inset 0 0 0 1px rgba(0, 160, 223, 0.18);
+      border-color: rgba(0, 160, 223, 0.26);
     }
-    .segment.active {
-      background: #171717;
-      color: #fff;
-      box-shadow: 0 10px 28px rgba(23, 23, 23, 0.16);
-    }
-    .source-chip.active {
-      background: #e9f8fe;
-      color: #007fb5;
+    .source-card.active,
+    .style-chip.active {
+      background: #eaf8fe;
       border-color: rgba(0, 160, 223, 0.28);
+      color: #007fb5;
     }
-    .scrollbar-subtle::-webkit-scrollbar { width: 7px; height: 7px; }
-    .scrollbar-subtle::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.12); border-radius: 999px; }
+    .diff-add {
+      background: linear-gradient(180deg, rgba(0,160,223,0.13), rgba(0,160,223,0.13));
+      border-bottom: 1px solid rgba(0,160,223,0.55);
+      border-radius: 5px;
+      padding: 1px 3px;
+    }
+    .diff-del {
+      color: #a1a1aa;
+      text-decoration: line-through;
+      text-decoration-color: rgba(244,63,94,0.55);
+    }
     .toast {
       transform: translateY(16px);
       opacity: 0;
@@ -75,222 +83,265 @@
       transform: translateY(0);
       opacity: 1;
     }
+    .scrollbar-subtle::-webkit-scrollbar { width: 7px; height: 7px; }
+    .scrollbar-subtle::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.13); border-radius: 999px; }
     .drawer {
       transform: translateX(105%);
       transition: transform 240ms ease;
     }
     .drawer.open { transform: translateX(0); }
-    .rank-1 { background: linear-gradient(135deg, #171717, #3f3f46); color: #fff; }
-    .rank-2 { background: #e9f8fe; color: #007fb5; }
-    .rank-3 { background: #f4f4f5; color: #52525b; }
   </style>
 </head>
 <body class="min-h-screen font-inter">
   <div class="min-h-screen p-4 lg:p-6">
-    <div class="mx-auto flex max-w-[1480px] gap-4">
-      <aside class="glass sticky top-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 rounded-[28px] border border-black/5 p-4 shadow-soft lg:flex lg:flex-col">
+    <div class="mx-auto flex max-w-[1500px] gap-4">
+      <aside class="glass sticky top-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 rounded-[30px] border border-black/5 p-4 shadow-soft lg:flex lg:flex-col">
         <div class="flex items-center gap-3 px-2 py-2">
           <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand text-lg font-black text-white shadow-lg shadow-sky-200">m</div>
           <div>
             <div class="text-lg font-extrabold tracking-tight text-brand">midu</div>
-            <div class="text-xs font-semibold text-neutral-500">模力通 · 监测中台</div>
+            <div class="text-xs font-semibold text-neutral-500">模力通 · 办公中台</div>
           </div>
         </div>
         <nav class="mt-8 space-y-1 text-sm font-medium text-neutral-600">
-          <button class="nav-item flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-neutral-100">
-            <span>✦</span><span>AI 智能体</span>
+          <button class="nav-item active flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition">
+            <span>✦</span><span>办公智能体</span>
           </button>
-          <button class="nav-item active flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition">
-            <span>●</span><span>热搜预警</span>
-          </button>
-          <button class="nav-item flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-neutral-100">
+          <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:bg-neutral-100">
             <span>□</span><span>公文写作</span>
           </button>
-          <button class="nav-item flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-neutral-100">
+          <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:bg-neutral-100">
             <span>◇</span><span>内容升华</span>
           </button>
-          <button class="nav-item flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition hover:bg-neutral-100">
+          <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:bg-neutral-100">
             <span>▤</span><span>一键排版</span>
+          </button>
+          <button class="nav-item flex w-full items-center gap-3 rounded-2xl border border-transparent px-3 py-2.5 text-left transition hover:bg-neutral-100">
+            <span>●</span><span>知识库</span>
           </button>
         </nav>
         <div class="mt-auto rounded-3xl border border-sky-100 bg-sky-50/80 p-4">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">今日状态</div>
-          <div class="mt-3 flex items-end justify-between">
-            <div>
-              <div class="text-3xl font-extrabold">24</div>
-              <div class="text-xs text-neutral-500">条命中预警</div>
-            </div>
-            <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-brand shadow-hairline">自动巡检</span>
-          </div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-brand">当前交付</div>
+          <div class="mt-3 text-3xl font-extrabold">3 合 1</div>
+          <p class="mt-2 text-xs leading-5 text-neutral-500">润色、升华、排版串联为办公交付流程。</p>
         </div>
       </aside>
 
       <main class="min-w-0 flex-1">
-        <header class="glass sticky top-4 z-30 rounded-[28px] border border-black/5 px-5 py-4 shadow-soft">
+        <header class="glass sticky top-4 z-30 rounded-[30px] border border-black/5 px-5 py-4 shadow-soft">
           <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
                 <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
-                Realtime Intelligence
+                Office Agent Workspace
               </div>
               <div class="mt-2 flex flex-wrap items-end gap-3">
-                <h1 class="text-3xl font-extrabold tracking-tight text-ink">热搜预警</h1>
-                <span class="mb-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">全网监测中</span>
+                <h1 class="text-3xl font-extrabold tracking-tight text-ink">办公智能体</h1>
+                <span class="mb-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">在线预览 · 可进入编辑器</span>
               </div>
-              <p class="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">聚合微博、抖音、今日头条、新闻站点与政务号热搜，识别突发舆情、品牌风险和政策相关趋势，支持来源片段追溯与预警规则配置。</p>
+              <p class="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">把文章初稿放进一个克制的办公工作台：先按文章类型动态润色，再关联学习专栏、金句用典与先贤经典做升华，最后套用个人格式模板完成交付。</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <button id="refreshBtn" class="rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-brand/30 hover:text-brand">刷新数据</button>
-              <button id="openDrawerBtn" class="rounded-2xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-sky-600">新建预警规则</button>
+              <button id="downloadBtn" class="rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-brand/30 hover:text-brand">下载预览稿</button>
+              <button id="editorBtn" class="rounded-2xl bg-brand px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-sky-200 transition hover:-translate-y-0.5 hover:bg-sky-600">进入现有编辑器</button>
             </div>
           </div>
         </header>
 
-        <section class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <article class="panel rounded-[28px] p-5">
+        <section class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <button class="mode-card active rounded-[28px] border border-transparent bg-white p-5 text-left shadow-soft transition hover:-translate-y-0.5" data-mode="polish">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-neutral-500">热搜命中</span>
-              <span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-brand">+18%</span>
+              <span class="rounded-2xl bg-sky-50 px-3 py-1.5 text-xs font-extrabold text-brand">01</span>
+              <span class="text-xs font-semibold text-neutral-400">语言优化</span>
             </div>
-            <div class="mt-4 text-3xl font-extrabold tracking-tight">128</div>
-            <p class="mt-2 text-sm text-neutral-500">过去 24 小时命中关键词</p>
-          </article>
-          <article class="panel rounded-[28px] p-5">
+            <h2 class="mt-4 text-xl font-extrabold tracking-tight">润色</h2>
+            <p class="mt-2 text-sm leading-6 text-neutral-500">动态推荐文风，支持 6 字以内自定义提示词，逐字标注修改。</p>
+          </button>
+          <button class="mode-card rounded-[28px] border border-transparent bg-white p-5 text-left shadow-soft transition hover:-translate-y-0.5" data-mode="elevate">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-neutral-500">高风险预警</span>
-              <span class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-600">需处理</span>
+              <span class="rounded-2xl bg-neutral-100 px-3 py-1.5 text-xs font-extrabold text-neutral-700">02</span>
+              <span class="text-xs font-semibold text-neutral-400">格局升华</span>
             </div>
-            <div class="mt-4 text-3xl font-extrabold tracking-tight">7</div>
-            <p class="mt-2 text-sm text-neutral-500">包含突发、负面与传播异常</p>
-          </article>
-          <article class="panel rounded-[28px] p-5">
+            <h2 class="mt-4 text-xl font-extrabold tracking-tight">升华</h2>
+            <p class="mt-2 text-sm leading-6 text-neutral-500">用户选择理论来源，整篇改写并展示标题与片段来源。</p>
+          </button>
+          <button class="mode-card rounded-[28px] border border-transparent bg-white p-5 text-left shadow-soft transition hover:-translate-y-0.5" data-mode="format">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-neutral-500">响应时效</span>
-              <span class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-600">SLA</span>
+              <span class="rounded-2xl bg-neutral-100 px-3 py-1.5 text-xs font-extrabold text-neutral-700">03</span>
+              <span class="text-xs font-semibold text-neutral-400">格式交付</span>
             </div>
-            <div class="mt-4 text-3xl font-extrabold tracking-tight">3m 12s</div>
-            <p class="mt-2 text-sm text-neutral-500">从上榜到生成预警摘要</p>
-          </article>
-          <article class="panel rounded-[28px] p-5">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-neutral-500">覆盖来源</span>
-              <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">8 平台</span>
-            </div>
-            <div class="mt-4 text-3xl font-extrabold tracking-tight">96.4%</div>
-            <p class="mt-2 text-sm text-neutral-500">核心平台抓取稳定率</p>
-          </article>
+            <h2 class="mt-4 text-xl font-extrabold tracking-tight">排版</h2>
+            <p class="mt-2 text-sm leading-6 text-neutral-500">个人模板最多 5 个，Word/PPT 100MB 内上传，复刻偏差目标 10%。</p>
+          </button>
         </section>
 
-        <section class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.42fr_0.88fr]">
-          <article class="panel rounded-[32px] p-5">
-            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 class="text-lg font-extrabold tracking-tight">热度趋势与风险曲线</h2>
-                <p class="mt-1 text-sm text-neutral-500">按小时监测热度、风险得分与传播加速度。</p>
-              </div>
-              <div class="flex rounded-2xl bg-neutral-100 p-1 text-sm font-semibold text-neutral-500">
-                <button class="segment active rounded-xl px-3 py-1.5" data-range="24h">24h</button>
-                <button class="segment rounded-xl px-3 py-1.5" data-range="7d">7d</button>
-                <button class="segment rounded-xl px-3 py-1.5" data-range="30d">30d</button>
-              </div>
-            </div>
-            <div class="mt-5 h-[320px]">
-              <canvas id="trendChart"></canvas>
-            </div>
-          </article>
-
-          <article class="panel rounded-[32px] p-5">
-            <div class="flex items-start justify-between">
-              <div>
-                <h2 class="text-lg font-extrabold tracking-tight">风险来源分布</h2>
-                <p class="mt-1 text-sm text-neutral-500">自动识别传播平台与情绪结构。</p>
-              </div>
-              <span class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-500">实时</span>
-            </div>
-            <div class="mt-5 h-[230px]">
-              <canvas id="sourceChart"></canvas>
-            </div>
-            <div class="mt-5 grid grid-cols-2 gap-3">
-              <div class="rounded-2xl bg-neutral-50 p-3">
-                <div class="text-xs text-neutral-500">负向声量</div>
-                <div class="mt-1 text-xl font-extrabold">31%</div>
-              </div>
-              <div class="rounded-2xl bg-neutral-50 p-3">
-                <div class="text-xs text-neutral-500">异常增速</div>
-                <div class="mt-1 text-xl font-extrabold text-brand">2.7x</div>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        <section class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[0.94fr_1.36fr]">
-          <article class="panel rounded-[32px] p-5">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h2 class="text-lg font-extrabold tracking-tight">热搜榜单</h2>
-                <p class="mt-1 text-sm text-neutral-500">点击条目查看来源片段和处置建议。</p>
-              </div>
-              <span id="listCount" class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-500">6 条</span>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button class="source-chip active rounded-full border border-transparent px-3 py-1.5 text-xs font-bold text-neutral-500" data-filter="all">全部</button>
-              <button class="source-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-filter="policy">政策</button>
-              <button class="source-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-filter="public">民生</button>
-              <button class="source-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-filter="industry">产业</button>
-              <button class="source-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-filter="urgent">突发</button>
-            </div>
-            <div id="hotList" class="scrollbar-subtle mt-4 max-h-[610px] space-y-3 overflow-auto pr-1"></div>
-          </article>
-
+        <section class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.18fr_0.82fr]">
           <article class="panel rounded-[32px] p-5">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <div id="detailSeverity" class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-600">高风险</div>
-                <h2 id="detailTitle" class="mt-3 text-2xl font-extrabold tracking-tight">新能源补贴退坡引发讨论</h2>
-                <p id="detailMeta" class="mt-2 text-sm text-neutral-500">微博热搜第 3 · 风险 92 · 传播速度 2.8x</p>
+                <h2 id="workspaceTitle" class="text-2xl font-extrabold tracking-tight">润色工作区</h2>
+                <p id="workspaceHint" class="mt-2 text-sm leading-6 text-neutral-500">系统识别为公文类文章，默认推荐「公文」文风，也可输入 6 字内自定义文风。</p>
               </div>
               <div class="flex gap-2">
-                <button id="markBtn" class="rounded-2xl border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:border-brand/30 hover:text-brand">标记已读</button>
-                <button id="previewBtn" class="rounded-2xl bg-ink px-3 py-2 text-sm font-bold text-white transition hover:bg-neutral-700">生成简报</button>
+                <button id="runBtn" class="rounded-2xl bg-ink px-4 py-2.5 text-sm font-bold text-white transition hover:bg-neutral-700">开始处理</button>
+                <button id="resetBtn" class="rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:border-brand/30 hover:text-brand">重置</button>
               </div>
             </div>
 
-            <div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
-              <div class="rounded-3xl border border-neutral-100 bg-neutral-50 p-4">
-                <div class="text-xs font-semibold text-neutral-500">风险得分</div>
-                <div id="detailScore" class="mt-2 text-2xl font-extrabold">92</div>
-              </div>
-              <div class="rounded-3xl border border-neutral-100 bg-neutral-50 p-4">
-                <div class="text-xs font-semibold text-neutral-500">声量</div>
-                <div id="detailVolume" class="mt-2 text-2xl font-extrabold">248k</div>
-              </div>
-              <div class="rounded-3xl border border-neutral-100 bg-neutral-50 p-4">
-                <div class="text-xs font-semibold text-neutral-500">建议动作</div>
-                <div id="detailAction" class="mt-2 text-lg font-extrabold text-brand">2 小时内响应</div>
-              </div>
-            </div>
-
-            <div class="mt-6 rounded-[28px] border border-neutral-100 bg-white p-5">
-              <div class="flex items-center justify-between">
-                <h3 class="text-sm font-extrabold">AI 预警摘要</h3>
-                <span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-brand">可复制到编辑器</span>
-              </div>
-              <p id="detailSummary" class="mt-3 text-sm leading-7 text-neutral-600">话题围绕新能源补贴节奏、地方政策兑现与消费者观望情绪扩散。讨论中出现对产业链价格波动的担忧，建议结合政策口径与权威数据进行解释。</p>
-            </div>
-
-            <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_0.82fr]">
-              <div>
+            <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div class="rounded-[28px] border border-neutral-100 bg-neutral-50 p-4">
                 <div class="flex items-center justify-between">
-                  <h3 class="text-sm font-extrabold">来源标题与片段</h3>
-                  <span class="text-xs font-semibold text-neutral-400">只展示标题和片段</span>
+                  <h3 class="text-sm font-extrabold">原文</h3>
+                  <span class="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-neutral-500 shadow-hairline">科技奖励决定</span>
                 </div>
-                <div id="sourceSnippets" class="mt-3 space-y-3"></div>
+                <textarea id="draftInput" class="scrollbar-subtle mt-3 h-[370px] w-full resize-none rounded-3xl border border-neutral-200 bg-white p-5 text-sm leading-7 text-neutral-700 outline-none transition focus:border-brand focus:ring-4 focus:ring-sky-100">关于颁发本年度科学技术奖励的决定
+
+各省、自治区、直辖市人民政府，国务院各部委、各直属机构：
+
+中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。为深入贯彻新时代创新发展要求，对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的集体和个人，决定予以奖励。
+
+希望获奖者继续努力，各地区各部门要营造尊重知识、尊重人才的良好氛围，推动科技成果转化，为高质量发展提供支撑。</textarea>
               </div>
-              <div>
-                <h3 class="text-sm font-extrabold">处置建议</h3>
-                <div id="actions" class="mt-3 space-y-3"></div>
+
+              <div class="rounded-[28px] border border-neutral-100 bg-white p-4">
+                <div class="flex items-center justify-between">
+                  <h3 id="previewTitle" class="text-sm font-extrabold">修订预览</h3>
+                  <span id="previewBadge" class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-brand">逐字修订</span>
+                </div>
+                <div id="resultPreview" class="scrollbar-subtle mt-3 h-[370px] overflow-auto rounded-3xl border border-neutral-100 bg-neutral-50 p-5 text-sm leading-8 text-neutral-700">
+                  <p class="font-bold text-ink">关于颁发本年度科学技术奖励的决定</p>
+                  <p class="mt-4">各省、自治区、直辖市人民政府，国务院各部委、各直属机构：</p>
+                  <p class="mt-4">中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。为<span class="diff-del">深入贯彻新时代创新发展要求</span><span class="diff-add">深入贯彻创新驱动发展战略</span>，对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的集体和个人，决定予以奖励。</p>
+                  <p class="mt-4">希望获奖者<span class="diff-del">继续努力</span><span class="diff-add">珍惜荣誉、再接再厉</span>，各地区各部门要营造尊重知识、尊重人才的良好氛围，推动科技成果转化，为高质量发展提供支撑。</p>
+                </div>
               </div>
             </div>
+
+            <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div class="rounded-[26px] border border-neutral-100 bg-white p-4">
+                <div class="text-xs font-bold uppercase tracking-[0.16em] text-neutral-400">Style</div>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button class="style-chip active rounded-full border border-transparent px-3 py-1.5 text-xs font-bold" data-style="公文">公文</button>
+                  <button class="style-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-style="正式">正式</button>
+                  <button class="style-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-style="精炼">精炼</button>
+                  <button class="style-chip rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-bold text-neutral-500" data-style="汇报">汇报</button>
+                </div>
+                <input id="customStyle" maxlength="6" placeholder="自定义，6字内" class="mt-3 w-full rounded-2xl border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-sky-100">
+              </div>
+              <div class="rounded-[26px] border border-neutral-100 bg-white p-4">
+                <div class="text-xs font-bold uppercase tracking-[0.16em] text-neutral-400">Delivery</div>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                  <button id="previewBtn" class="rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-brand/30 hover:text-brand">在线预览</button>
+                  <button id="downloadMiniBtn" class="rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-semibold text-neutral-700 hover:border-brand/30 hover:text-brand">下载</button>
+                </div>
+                <button id="editMiniBtn" class="mt-2 w-full rounded-2xl bg-brand px-3 py-2 text-sm font-extrabold text-white shadow-lg shadow-sky-100">进入编辑器</button>
+              </div>
+              <div class="rounded-[26px] border border-neutral-100 bg-white p-4">
+                <div class="text-xs font-bold uppercase tracking-[0.16em] text-neutral-400">Quality</div>
+                <div class="mt-3 flex items-end justify-between">
+                  <div>
+                    <div id="qualityScore" class="text-3xl font-extrabold">92</div>
+                    <div id="qualityLabel" class="text-xs text-neutral-500">表达规范度</div>
+                  </div>
+                  <span id="qualityDelta" class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">+18%</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="space-y-4">
+            <article class="panel rounded-[32px] p-5">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h2 class="text-lg font-extrabold tracking-tight">能力配置</h2>
+                  <p class="mt-1 text-sm text-neutral-500">来源、模板与处理策略。</p>
+                </div>
+                <span class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-500">个人可见</span>
+              </div>
+
+              <div class="mt-5 space-y-3">
+                <button class="source-card active flex w-full items-start gap-3 rounded-3xl border border-transparent p-4 text-left transition" data-source="learning">
+                  <span class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-2xl bg-white text-xs font-extrabold shadow-hairline">学</span>
+                  <div>
+                    <div class="text-sm font-extrabold">学习专栏</div>
+                    <p class="mt-1 text-xs leading-5 text-neutral-500">国家领导人讲话，适合理论升华。</p>
+                  </div>
+                </button>
+                <button class="source-card active flex w-full items-start gap-3 rounded-3xl border border-transparent p-4 text-left transition" data-source="quote">
+                  <span class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-2xl bg-white text-xs font-extrabold shadow-hairline">金</span>
+                  <div>
+                    <div class="text-sm font-extrabold">金句用典</div>
+                    <p class="mt-1 text-xs leading-5 text-neutral-500">标题和片段可追溯展示。</p>
+                  </div>
+                </button>
+                <button class="source-card flex w-full items-start gap-3 rounded-3xl border border-neutral-200 bg-neutral-50 p-4 text-left transition" data-source="classic">
+                  <span class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-2xl bg-white text-xs font-extrabold shadow-hairline">典</span>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                      <div class="text-sm font-extrabold">先贤经典</div>
+                      <span class="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-neutral-500 shadow-hairline">敬请期待</span>
+                    </div>
+                    <p class="mt-1 text-xs leading-5 text-neutral-500">入口全员可见，暂未正式开放。</p>
+                  </div>
+                </button>
+              </div>
+            </article>
+
+            <article class="panel rounded-[32px] p-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-extrabold tracking-tight">个人排版模板</h2>
+                  <p class="mt-1 text-sm text-neutral-500">最多 5 个 · 当前 4 个</p>
+                </div>
+                <button id="uploadTemplateBtn" class="rounded-2xl bg-ink px-3 py-2 text-xs font-bold text-white">上传模板</button>
+              </div>
+              <div class="mt-4 space-y-2">
+                <button class="template-card flex w-full items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 p-3 text-left" data-template="机关公文模板">
+                  <span class="text-sm font-bold text-brand">机关公文模板</span><span class="text-xs font-semibold text-brand">默认</span>
+                </button>
+                <button class="template-card flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left" data-template="汇报材料模板">
+                  <span class="text-sm font-bold text-neutral-700">汇报材料模板</span><span class="text-xs text-neutral-400">Word</span>
+                </button>
+                <button class="template-card flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left" data-template="年度总结 PPT">
+                  <span class="text-sm font-bold text-neutral-700">年度总结 PPT</span><span class="text-xs text-neutral-400">PPT</span>
+                </button>
+              </div>
+              <div class="mt-4 rounded-3xl bg-neutral-50 p-4">
+                <div class="flex items-center justify-between text-xs font-semibold text-neutral-500">
+                  <span>复刻偏差目标</span><span>≤ 10%</span>
+                </div>
+                <div class="mt-3 h-2 overflow-hidden rounded-full bg-neutral-200">
+                  <div id="fidelityBar" class="h-full w-[92%] rounded-full bg-brand"></div>
+                </div>
+                <p id="templateHint" class="mt-3 text-xs leading-5 text-neutral-500">已选择「机关公文模板」，支持页眉页脚、目录、编号、多级标题和封面复刻。</p>
+              </div>
+            </article>
+          </aside>
+        </section>
+
+        <section class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+          <article class="panel rounded-[32px] p-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-extrabold tracking-tight">处理质量趋势</h2>
+                <p class="mt-1 text-sm text-neutral-500">展示润色、升华、排版的近 7 次处理表现。</p>
+              </div>
+              <span class="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-brand">Chart.js</span>
+            </div>
+            <div class="mt-5 h-[260px]">
+              <canvas id="qualityChart"></canvas>
+            </div>
+          </article>
+
+          <article class="panel rounded-[32px] p-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-extrabold tracking-tight">来源标题与片段</h2>
+                <p class="mt-1 text-sm text-neutral-500">升华仅向用户展示标题和片段，相关性评分内部使用。</p>
+              </div>
+              <button id="copySourcesBtn" class="rounded-2xl border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-600 hover:border-brand/30 hover:text-brand">复制来源</button>
+            </div>
+            <div id="sourceList" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"></div>
           </article>
         </section>
       </main>
@@ -298,232 +349,95 @@
   </div>
 
   <div id="drawerBackdrop" class="fixed inset-0 z-40 hidden bg-black/20"></div>
-  <aside id="ruleDrawer" class="drawer fixed right-0 top-0 z-50 h-full w-full max-w-[460px] bg-white p-6 shadow-2xl">
+  <aside id="uploadDrawer" class="drawer fixed right-0 top-0 z-50 h-full w-full max-w-[460px] bg-white p-6 shadow-2xl">
     <div class="flex items-start justify-between">
       <div>
-        <div class="text-xs font-bold uppercase tracking-[0.18em] text-brand">Rule Builder</div>
-        <h2 class="mt-2 text-2xl font-extrabold tracking-tight">新建预警规则</h2>
-        <p class="mt-2 text-sm leading-6 text-neutral-500">配置关键词、来源、风险阈值与通知方式，规则保存后立即进入自动巡检。</p>
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-brand">Template</div>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight">上传格式模板</h2>
+        <p class="mt-2 text-sm leading-6 text-neutral-500">支持 100MB 以下 Word/PPT，提取页眉页脚、目录、编号、多级标题、封面和 PPT 母版。</p>
       </div>
       <button id="closeDrawerBtn" class="rounded-full border border-neutral-200 p-2 text-neutral-500 hover:bg-neutral-50">✕</button>
     </div>
-    <div class="mt-7 space-y-5">
+    <div class="mt-7 rounded-[28px] border border-dashed border-sky-200 bg-sky-50/60 p-8 text-center">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-white text-2xl shadow-hairline">⇧</div>
+      <div class="mt-4 text-sm font-extrabold">拖拽文件到此处或点击上传</div>
+      <p class="mt-2 text-xs leading-5 text-neutral-500">doc、docx、ppt、pptx · 单文件小于 100MB</p>
+    </div>
+    <div class="mt-6 space-y-4">
       <label class="block">
-        <span class="text-sm font-bold">规则名称</span>
-        <input value="重点政策热搜预警" class="mt-2 w-full rounded-2xl border border-neutral-200 px-4 py-3 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-sky-100">
+        <span class="text-sm font-bold">模板名称</span>
+        <input id="templateNameInput" value="新建公文格式模板" class="mt-2 w-full rounded-2xl border border-neutral-200 px-4 py-3 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-sky-100">
       </label>
-      <label class="block">
-        <span class="text-sm font-bold">关键词组</span>
-        <textarea class="mt-2 h-28 w-full resize-none rounded-2xl border border-neutral-200 px-4 py-3 text-sm outline-none transition focus:border-brand focus:ring-4 focus:ring-sky-100">新能源补贴、科技奖励、公文发布、政策解读、民生回应</textarea>
+      <label class="flex items-center gap-3 rounded-2xl border border-neutral-200 p-4 text-sm font-semibold">
+        <input type="checkbox" checked class="accent-sky-500"> 设为默认模板
       </label>
-      <div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-bold">风险阈值</span>
-          <span id="thresholdValue" class="text-sm font-extrabold text-brand">70</span>
-        </div>
-        <input id="threshold" type="range" min="30" max="95" value="70" class="mt-3 w-full accent-sky-500">
-      </div>
-      <div>
-        <span class="text-sm font-bold">监测来源</span>
-        <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
-          <label class="flex items-center gap-2 rounded-2xl border border-neutral-200 p-3"><input type="checkbox" checked class="accent-sky-500">微博热搜</label>
-          <label class="flex items-center gap-2 rounded-2xl border border-neutral-200 p-3"><input type="checkbox" checked class="accent-sky-500">抖音热点</label>
-          <label class="flex items-center gap-2 rounded-2xl border border-neutral-200 p-3"><input type="checkbox" checked class="accent-sky-500">头条榜单</label>
-          <label class="flex items-center gap-2 rounded-2xl border border-neutral-200 p-3"><input type="checkbox" class="accent-sky-500">新闻站点</label>
-        </div>
-      </div>
-      <button id="saveRuleBtn" class="w-full rounded-2xl bg-brand py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600">保存并开始预警</button>
+      <button id="saveTemplateBtn" class="w-full rounded-2xl bg-brand py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600">保存模板</button>
     </div>
   </aside>
 
   <div id="toast" class="toast fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 shadow-soft"></div>
 
   <script>
-    const topics = [
-      {
-        id: 1,
-        category: 'policy',
-        rank: 1,
-        title: '新能源补贴退坡引发讨论',
-        platform: '微博热搜',
-        severity: '高风险',
+    const modes = {
+      polish: {
+        title: '润色工作区',
+        hint: '系统识别为公文类文章，默认推荐「公文」文风，也可输入 6 字内自定义文风。',
+        previewTitle: '修订预览',
+        badge: '逐字修订',
         score: 92,
-        volume: '248k',
-        speed: '2.8x',
-        action: '2 小时内响应',
-        summary: '话题围绕新能源补贴节奏、地方政策兑现与消费者观望情绪扩散。讨论中出现对产业链价格波动的担忧，建议结合政策口径与权威数据进行解释。',
-        snippets: [
-          ['#新能源补贴退坡# 登上热搜前三', '多地用户讨论补贴截止时间与购车成本变化，评论区出现集中问询。'],
-          ['行业媒体：价格体系或进入调整期', '报道提及上游材料价格波动和终端销售节奏变化。'],
-          ['地方政务号发布政策问答', '官方回应补贴申请流程、到账周期和咨询渠道。']
-        ],
-        actions: ['发布权威政策问答', '同步客服口径', '监控负面关键词扩散']
+        label: '表达规范度',
+        delta: '+18%',
+        result: `
+          <p class="font-bold text-ink">关于颁发本年度科学技术奖励的决定</p>
+          <p class="mt-4">各省、自治区、直辖市人民政府，国务院各部委、各直属机构：</p>
+          <p class="mt-4">中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。为<span class="diff-del">深入贯彻新时代创新发展要求</span><span class="diff-add">深入贯彻创新驱动发展战略</span>，对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的集体和个人，决定予以奖励。</p>
+          <p class="mt-4">希望获奖者<span class="diff-del">继续努力</span><span class="diff-add">珍惜荣誉、再接再厉</span>，各地区各部门要营造尊重知识、尊重人才的良好氛围，推动科技成果转化，为高质量发展提供支撑。</p>
+        `
       },
-      {
-        id: 2,
-        category: 'urgent',
-        rank: 2,
-        title: '某地暴雨交通管制信息扩散',
-        platform: '抖音热点',
-        severity: '高风险',
+      elevate: {
+        title: '升华工作区',
+        hint: '选择学习专栏、金句用典等来源，模型将发掘关联性并整篇改写文章格局。',
+        previewTitle: '升华改写',
+        badge: '来源可追溯',
         score: 88,
-        volume: '196k',
-        speed: '3.4x',
-        action: '立即核实',
-        summary: '短视频平台出现多条道路积水与交通管制相关内容，传播速度高于常态。建议核实官方通报并同步出行提示，降低谣言二次扩散。',
-        snippets: [
-          ['城区主干道积水视频集中传播', '多个视频片段指向同一区域，发布时间集中在 30 分钟内。'],
-          ['本地媒体发布临时交通提醒', '提醒市民避开低洼路段，并关注气象预警。'],
-          ['评论区出现不实封路说法', '部分用户转发未经证实的封控范围。']
-        ],
-        actions: ['核实官方通告', '生成出行提醒', '标注不实信息']
+        label: '理论关联度',
+        delta: '+24%',
+        result: `
+          <p class="font-bold text-ink">关于颁发本年度科学技术奖励的决定</p>
+          <p class="mt-4">科技兴则民族兴，科技强则国家强。面向高质量发展新阶段，必须把科技自立自强作为战略支撑，把创新摆在现代化建设全局的核心位置。</p>
+          <p class="mt-4">本年度科学技术奖励，既是对突出贡献者的褒奖，也是对全社会尊重知识、尊重人才、崇尚创新的鲜明导向。希望获奖者珍惜荣誉、再接再厉，在关键核心技术攻关、科技成果转化和服务国家战略中继续走在前列。</p>
+          <p class="mt-4"><span class="diff-add">各地区各部门要以此次奖励为契机，完善创新生态，强化人才支撑，让更多科技成果从实验室走向生产线、走向现代化建设主战场。</span></p>
+        `
       },
-      {
-        id: 3,
-        category: 'public',
-        rank: 3,
-        title: '医保新规报销比例解读',
-        platform: '今日头条',
-        severity: '中风险',
-        score: 74,
-        volume: '139k',
-        speed: '1.9x',
-        action: '4 小时内跟进',
-        summary: '用户关注医保报销范围、异地结算和个人账户使用方式。当前情绪以疑问为主，适合发布通俗化解读与案例说明。',
-        snippets: [
-          ['医保新规如何影响个人账户', '问答类文章被大量收藏，评论集中在报销比例。'],
-          ['异地结算流程被反复提及', '用户希望获取更明确的办理路径。'],
-          ['权威解读阅读量快速上升', '专业媒体发布条目式说明，转发量稳定增长。']
-        ],
-        actions: ['发布图解版说明', '整理高频问答', '导流官方办理入口']
-      },
-      {
-        id: 4,
-        category: 'industry',
-        rank: 4,
-        title: 'AI 写作工具版权边界热议',
-        platform: '知乎热榜',
-        severity: '中风险',
-        score: 69,
-        volume: '82k',
-        speed: '1.6x',
-        action: '观察',
-        summary: '讨论聚焦 AI 写作内容归属、引用来源和人工修改责任。可结合产品的来源追溯、修订标注和编辑器能力进行正向回应。',
-        snippets: [
-          ['AI 生成内容是否需要标注来源', '高赞回答强调来源追溯和人工审核的重要性。'],
-          ['写作工具如何避免同质化', '用户关注模板化表达与原创性之间的关系。'],
-          ['企业知识库写作场景被提及', '讨论中出现对专业写作平台的需求。']
-        ],
-        actions: ['准备品牌回应', '强调来源可追溯', '收集产品反馈']
-      },
-      {
-        id: 5,
-        category: 'policy',
-        rank: 5,
-        title: '年度科学技术奖励公示',
-        platform: '新闻榜单',
-        severity: '低风险',
-        score: 42,
-        volume: '51k',
-        speed: '0.9x',
-        action: '常规监测',
-        summary: '话题以正向传播为主，适合沉淀为公文写作、荣誉发布和政策解读素材。当前未发现明显负面情绪。',
-        snippets: [
-          ['年度科技奖励名单公示', '多个新闻站点转载公示信息，阅读量平稳增长。'],
-          ['科研团队成果被关注', '评论区以祝贺和科普讨论为主。'],
-          ['相关政策文件被检索', '用户关注评选标准和申报流程。']
-        ],
-        actions: ['收藏为写作素材', '跟踪后续报道', '无需主动响应']
-      },
-      {
-        id: 6,
-        category: 'public',
-        rank: 6,
-        title: '城市更新项目征询意见',
-        platform: '本地榜单',
-        severity: '中风险',
-        score: 63,
-        volume: '76k',
-        speed: '1.4x',
-        action: '6 小时内回应',
-        summary: '居民主要关注施工周期、交通影响和补偿说明。建议提前准备问答稿，并持续监测社区平台情绪变化。',
-        snippets: [
-          ['城市更新项目进入意见征询', '本地用户关注具体街区范围和时间安排。'],
-          ['施工影响被集中讨论', '评论中多次出现噪音、通行与商户经营关键词。'],
-          ['社区号发布意见收集链接', '留言量在午间出现明显上升。']
-        ],
-        actions: ['补充项目 FAQ', '联动社区渠道', '生成回应模板']
+      format: {
+        title: '排版工作区',
+        hint: '选择个人模板后，系统自动套用页眉页脚、目录、编号、多级标题、封面和 PPT 母版。',
+        previewTitle: '格式预览',
+        badge: '偏差 ≤ 10%',
+        score: 94,
+        label: '格式复刻度',
+        delta: '6% 偏差',
+        result: `
+          <div class="mx-auto max-w-[520px] bg-white p-6 shadow-hairline">
+            <div class="text-center text-xs tracking-[0.2em] text-neutral-400">发文机关代字〔2026〕10号</div>
+            <div class="mt-4 h-0.5 bg-rose-500"></div>
+            <h2 class="mt-10 text-center text-xl font-bold">关于颁发本年度科学技术奖励的决定</h2>
+            <p class="mt-8">各省、自治区、直辖市人民政府，国务院各部委、各直属机构：</p>
+            <p class="mt-4 indent-8">中国式现代化关键在科技现代化。为表彰先进、鼓励创新，决定对作出突出贡献的集体和个人予以奖励。</p>
+            <p class="mt-4 indent-8">希望获奖者珍惜荣誉、再接再厉，为高质量发展提供有力支撑。</p>
+          </div>
+        `
       }
+    };
+
+    const sources = [
+      ['学习专栏', '坚持科技自立自强，是国家发展的战略支撑。'],
+      ['金句用典', '科技兴则民族兴，科技强则国家强。'],
+      ['先贤经典', '敬请期待：入口可见，内容开放后可作为正式来源。'],
+      ['政策文件', '完善科技奖励制度，营造尊重知识、尊重人才的社会氛围。']
     ];
 
-    const hotList = document.getElementById('hotList');
-    const listCount = document.getElementById('listCount');
-    let activeTopic = topics[0];
-
-    function severityClass(severity) {
-      if (severity === '高风险') return 'bg-rose-50 text-rose-600';
-      if (severity === '中风险') return 'bg-amber-50 text-amber-700';
-      return 'bg-emerald-50 text-emerald-700';
-    }
-
-    function rankClass(rank) {
-      if (rank === 1) return 'rank-1';
-      if (rank === 2) return 'rank-2';
-      if (rank === 3) return 'rank-3';
-      return 'bg-white text-neutral-500 border border-neutral-200';
-    }
-
-    function renderList(filter = 'all') {
-      const filtered = filter === 'all' ? topics : topics.filter((topic) => topic.category === filter);
-      listCount.textContent = `${filtered.length} 条`;
-      hotList.innerHTML = filtered.map((topic) => `
-        <button class="topic-card w-full rounded-[24px] border ${topic.id === activeTopic.id ? 'border-sky-200 bg-sky-50/70' : 'border-neutral-100 bg-white'} p-4 text-left transition hover:border-sky-200 hover:bg-sky-50/50" data-id="${topic.id}">
-          <div class="flex items-start gap-3">
-            <span class="${rankClass(topic.rank)} flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold">${topic.rank}</span>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <h3 class="truncate text-sm font-extrabold text-ink">${topic.title}</h3>
-                <span class="${severityClass(topic.severity)} shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold">${topic.severity}</span>
-              </div>
-              <p class="mt-1 text-xs text-neutral-500">${topic.platform} · 声量 ${topic.volume} · 增速 ${topic.speed}</p>
-              <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-neutral-100">
-                <div class="h-full rounded-full bg-brand" style="width: ${topic.score}%"></div>
-              </div>
-            </div>
-          </div>
-        </button>
-      `).join('');
-      document.querySelectorAll('.topic-card').forEach((card) => {
-        card.addEventListener('click', () => {
-          activeTopic = topics.find((topic) => topic.id === Number(card.dataset.id));
-          updateDetail();
-          renderList(filter);
-        });
-      });
-    }
-
-    function updateDetail() {
-      document.getElementById('detailSeverity').className = `inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${severityClass(activeTopic.severity)}`;
-      document.getElementById('detailSeverity').textContent = activeTopic.severity;
-      document.getElementById('detailTitle').textContent = activeTopic.title;
-      document.getElementById('detailMeta').textContent = `${activeTopic.platform}第 ${activeTopic.rank} · 风险 ${activeTopic.score} · 传播速度 ${activeTopic.speed}`;
-      document.getElementById('detailScore').textContent = activeTopic.score;
-      document.getElementById('detailVolume').textContent = activeTopic.volume;
-      document.getElementById('detailAction').textContent = activeTopic.action;
-      document.getElementById('detailSummary').textContent = activeTopic.summary;
-      document.getElementById('sourceSnippets').innerHTML = activeTopic.snippets.map((snippet) => `
-        <div class="rounded-3xl border border-neutral-100 bg-neutral-50 p-4">
-          <div class="text-sm font-bold text-ink">${snippet[0]}</div>
-          <p class="mt-2 text-sm leading-6 text-neutral-500">${snippet[1]}</p>
-        </div>
-      `).join('');
-      document.getElementById('actions').innerHTML = activeTopic.actions.map((action, index) => `
-        <div class="flex items-center gap-3 rounded-3xl border border-neutral-100 bg-white p-3">
-          <span class="flex h-7 w-7 items-center justify-center rounded-xl bg-sky-50 text-xs font-extrabold text-brand">${index + 1}</span>
-          <span class="text-sm font-semibold text-neutral-700">${action}</span>
-        </div>
-      `).join('');
-    }
+    let activeMode = 'polish';
 
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -532,18 +446,42 @@
       setTimeout(() => toast.classList.remove('show'), 1800);
     }
 
+    function setMode(mode) {
+      activeMode = mode;
+      const data = modes[mode];
+      document.querySelectorAll('.mode-card').forEach((card) => {
+        card.classList.toggle('active', card.dataset.mode === mode);
+      });
+      document.getElementById('workspaceTitle').textContent = data.title;
+      document.getElementById('workspaceHint').textContent = data.hint;
+      document.getElementById('previewTitle').textContent = data.previewTitle;
+      document.getElementById('previewBadge').textContent = data.badge;
+      document.getElementById('qualityScore').textContent = data.score;
+      document.getElementById('qualityLabel').textContent = data.label;
+      document.getElementById('qualityDelta').textContent = data.delta;
+      document.getElementById('resultPreview').innerHTML = data.result;
+      showToast(`已切换到${data.title}`);
+    }
+
+    function renderSources() {
+      document.getElementById('sourceList').innerHTML = sources.map((source) => `
+        <div class="rounded-3xl border border-neutral-100 bg-white p-4">
+          <div class="text-sm font-extrabold text-ink">${source[0]}</div>
+          <p class="mt-2 text-sm leading-6 text-neutral-500">${source[1]}</p>
+        </div>
+      `).join('');
+    }
+
     function createCharts() {
-      const trendContext = document.getElementById('trendChart');
-      const sourceContext = document.getElementById('sourceChart');
-      const gridColor = 'rgba(15, 23, 42, 0.06)';
-      new Chart(trendContext, {
+      const context = document.getElementById('qualityChart');
+      new Chart(context, {
         type: 'line',
         data: {
-          labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+          labels: ['1', '2', '3', '4', '5', '6', '7'],
           datasets: [
             {
-              label: '热度',
-              data: [28, 34, 31, 48, 67, 86, 78, 92],
+              label: '润色规范度',
+              data: [73, 78, 82, 84, 88, 91, 92],
               borderColor: '#00A0DF',
               backgroundColor: 'rgba(0, 160, 223, 0.12)',
               tension: 0.42,
@@ -551,8 +489,8 @@
               pointRadius: 3
             },
             {
-              label: '风险',
-              data: [22, 28, 25, 39, 54, 71, 66, 83],
+              label: '格式复刻度',
+              data: [86, 88, 87, 91, 92, 93, 94],
               borderColor: '#171717',
               backgroundColor: 'rgba(23, 23, 23, 0.06)',
               tension: 0.42,
@@ -568,53 +506,56 @@
             legend: { labels: { usePointStyle: true, boxWidth: 8, color: '#52525b' } },
             tooltip: { mode: 'index', intersect: false }
           },
-          interaction: { mode: 'nearest', intersect: false },
           scales: {
-            x: { grid: { color: gridColor }, ticks: { color: '#71717a' } },
-            y: { grid: { color: gridColor }, ticks: { color: '#71717a' }, beginAtZero: true, max: 100 }
-          }
-        }
-      });
-
-      new Chart(sourceContext, {
-        type: 'doughnut',
-        data: {
-          labels: ['微博', '抖音', '头条', '新闻', '本地'],
-          datasets: [{
-            data: [32, 24, 18, 16, 10],
-            backgroundColor: ['#00A0DF', '#171717', '#7dd3fc', '#d4d4d8', '#f59e0b'],
-            borderWidth: 0,
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '72%',
-          plugins: {
-            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: '#52525b' } }
+            x: { grid: { color: 'rgba(15,23,42,0.06)' }, ticks: { color: '#71717a' } },
+            y: { grid: { color: 'rgba(15,23,42,0.06)' }, ticks: { color: '#71717a' }, beginAtZero: true, max: 100 }
           }
         }
       });
     }
 
-    document.querySelectorAll('.source-chip').forEach((chip) => {
+    document.querySelectorAll('.mode-card').forEach((card) => {
+      card.addEventListener('click', () => setMode(card.dataset.mode));
+    });
+
+    document.querySelectorAll('.style-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
-        document.querySelectorAll('.source-chip').forEach((item) => item.classList.remove('active'));
+        document.querySelectorAll('.style-chip').forEach((item) => item.classList.remove('active'));
         chip.classList.add('active');
-        renderList(chip.dataset.filter);
+        showToast(`已选择「${chip.dataset.style}」文风`);
       });
     });
 
-    document.querySelectorAll('.segment').forEach((segment) => {
-      segment.addEventListener('click', () => {
-        document.querySelectorAll('.segment').forEach((item) => item.classList.remove('active'));
-        segment.classList.add('active');
-        showToast(`已切换到 ${segment.textContent} 趋势视图`);
+    document.getElementById('customStyle').addEventListener('input', (event) => {
+      if (event.target.value.length >= 6) {
+        showToast('自定义文风最多 6 个汉字');
+      }
+    });
+
+    document.querySelectorAll('.source-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        if (card.dataset.source === 'classic') {
+          showToast('先贤经典敬请期待');
+          return;
+        }
+        card.classList.toggle('active');
+        showToast('升华来源已更新');
       });
     });
 
-    const drawer = document.getElementById('ruleDrawer');
+    document.querySelectorAll('.template-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.template-card').forEach((item) => {
+          item.classList.remove('border-sky-200', 'bg-sky-50');
+          item.classList.add('border-neutral-200', 'bg-white');
+        });
+        card.classList.add('border-sky-200', 'bg-sky-50');
+        card.classList.remove('border-neutral-200', 'bg-white');
+        document.getElementById('templateHint').textContent = `已选择「${card.dataset.template}」，可继续编辑全部提取到的格式项。`;
+      });
+    });
+
+    const drawer = document.getElementById('uploadDrawer');
     const backdrop = document.getElementById('drawerBackdrop');
     function openDrawer() {
       backdrop.classList.remove('hidden');
@@ -625,22 +566,27 @@
       setTimeout(() => backdrop.classList.add('hidden'), 220);
     }
 
-    document.getElementById('openDrawerBtn').addEventListener('click', openDrawer);
+    document.getElementById('uploadTemplateBtn').addEventListener('click', openDrawer);
     document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
-    document.getElementById('threshold').addEventListener('input', (event) => {
-      document.getElementById('thresholdValue').textContent = event.target.value;
-    });
-    document.getElementById('saveRuleBtn').addEventListener('click', () => {
+    document.getElementById('saveTemplateBtn').addEventListener('click', () => {
       closeDrawer();
-      showToast('预警规则已保存，自动巡检已开启');
+      showToast('模板已保存，当前个人模板 5/5');
     });
-    document.getElementById('refreshBtn').addEventListener('click', () => showToast('数据已刷新：新增 3 条热搜命中'));
-    document.getElementById('markBtn').addEventListener('click', () => showToast('已标记为已读'));
-    document.getElementById('previewBtn').addEventListener('click', () => showToast('简报已生成，可进入编辑器继续修改'));
 
-    renderList();
-    updateDetail();
+    document.getElementById('runBtn').addEventListener('click', () => {
+      setMode(activeMode);
+      showToast('处理完成，已生成逐字修订预览');
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => showToast('已恢复示例初稿'));
+    document.getElementById('previewBtn').addEventListener('click', () => showToast('已打开在线预览'));
+    document.getElementById('downloadMiniBtn').addEventListener('click', () => showToast('已生成下载文件'));
+    document.getElementById('downloadBtn').addEventListener('click', () => showToast('预览稿下载已开始'));
+    document.getElementById('editMiniBtn').addEventListener('click', () => showToast('正在进入现有写作编辑器'));
+    document.getElementById('editorBtn').addEventListener('click', () => showToast('正在进入现有写作编辑器'));
+    document.getElementById('copySourcesBtn').addEventListener('click', () => showToast('来源标题与片段已复制'));
+
+    renderSources();
     createCharts();
   </script>
 </body>
