@@ -190,6 +190,57 @@
       font-size: 11px; padding: 2px 8px; border-radius: 4px;
       background: #F3F4F6; color: #6B7280; font-weight: 500;
     }
+    /* ── Elevate dropdown panel ── */
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .elevate-panel {
+      background: #fff; border: 1px solid #E4E7ED;
+      border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      overflow: hidden; animation: slideDown .2s ease;
+      margin-top: 10px;
+    }
+    /* Source chips (pill style) */
+    .src-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 12px; border-radius: 20px; font-size: 12.5px;
+      cursor: pointer; border: 1.5px solid; font-weight: 500;
+      transition: all .12s; font-family: inherit;
+    }
+    .src-pill.off { border-color:#E5E7EB; color:#6B7280; background:#F9FAFB; }
+    .src-pill.off:hover { border-color:#D1D5DB; background:#F3F4F6; }
+    .src-pill.c-blue   { background:#EFF6FF; border-color:#93C5FD; color:#2563EB; }
+    .src-pill.c-amber  { background:#FFFBEB; border-color:#FCD34D; color:#B45309; }
+    .src-pill.c-violet { background:#F5F3FF; border-color:#C4B5FD; color:#7C3AED; }
+    .src-pill.c-action { background:#F9FAFB; border-color:#D1D5DB; color:#374151; }
+    /* KB status cards */
+    .kb-card  { padding:11px 13px; border-radius:10px; border:1px solid; }
+    .kb-green  { background:#F0FDF4; border-color:#BBF7D0; }
+    .kb-yellow { background:#FEFCE8; border-color:#FDE68A; }
+    .kb-orange { background:#FFF7ED; border-color:#FED7AA; }
+    /* Comparison cards */
+    .cmp-before { background:#F8F9FA; border:1px solid #E8EBF0; border-radius:12px; padding:16px; }
+    .cmp-after  { background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:16px; }
+    .quote-hl {
+      display:inline; background:rgba(251,191,36,.18);
+      border-left:3px solid #F59E0B; padding:1px 6px 1px 7px;
+      border-radius:0 3px 3px 0; margin:0 2px;
+    }
+    /* 立即升华 button */
+    .btn-elevate {
+      background:linear-gradient(135deg,#FF8C00,#FF6100);
+      color:#fff; border:none; border-radius:10px;
+      padding:10px 22px; font-size:14px; font-weight:600;
+      cursor:pointer; transition:all .14s; font-family:inherit;
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .btn-elevate:hover { filter:brightness(1.07); box-shadow:0 4px 14px rgba(255,100,0,.3); }
+    .btn-elevate:disabled { opacity:.5; cursor:not-allowed; }
+    /* Feat btn active (elevate open) */
+    .feat-btn.e-active { border-color:var(--p)!important; background:var(--p-lt)!important; color:var(--p)!important; box-shadow:0 2px 8px rgba(0,160,223,.18)!important; }
+    /* Result diff area */
+    .edrop-result { background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:16px; }
   </style>
 </head>
 <body>
@@ -494,7 +545,7 @@
           </button>
 
           <!-- NEW: 升华 -->
-          <button class="feat-btn feat-new" onclick="navigate('elevate')">
+          <button class="feat-btn feat-new" id="elevate-toggle-btn" onclick="toggleElevatePanel()">
             <span class="feat-icon" style="background:#E0F4FB;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6l4.2-1z"
@@ -518,6 +569,180 @@
             排版
             <span class="feat-new-tag">New</span>
           </button>
+        </div>
+
+        <!-- ── ELEVATE DROPDOWN PANEL ── -->
+        <div id="elevate-drop" class="w-full hidden" style="max-width:740px;">
+          <div class="elevate-panel">
+
+            <!-- Header -->
+            <div class="px-6 pt-5 pb-4 flex items-start gap-3 border-b" style="border-color:#F0F2F5;">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
+                   style="background:linear-gradient(135deg,#FEF3C7,#FCD34D);">⭐</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-base font-bold" style="color:#1A1A2E;letter-spacing:-.2px;">AI 升华引用</span>
+                  <span class="text-white text-xs font-bold px-2 py-0.5 rounded"
+                        style="background:#4F7CF8;font-size:11px;">新功能</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                  将文章观点与经典典籍、党政文献智能关联，提升思想深度
+                </p>
+              </div>
+              <button onclick="toggleElevatePanel()"
+                      class="btn-g w-8 h-8 p-0 flex items-center justify-center rounded-lg flex-shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Two-column body -->
+            <div class="px-6 py-5" style="display:grid;grid-template-columns:1fr 256px;gap:20px;">
+
+              <!-- Left: Input + sources -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">粘贴需要升华的文段</label>
+                <textarea id="edrop-input" rows="5"
+                  placeholder="粘贴或输入你的文章段落，AI 将自动匹配经典语录并嵌入引文..."
+                  style="height:140px;font-size:13.5px;line-height:1.75;border-color:#E4E7ED;border-radius:10px;"></textarea>
+
+                <!-- Source chips -->
+                <div class="flex flex-wrap items-center gap-2 mt-3">
+                  <span class="text-xs font-medium text-gray-500 flex-shrink-0">引用来源：</span>
+                  <button class="src-pill c-blue" id="ep-lx" onclick="togglePill(this,'c-blue','学习专栏')">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    学习专栏
+                  </button>
+                  <button class="src-pill c-amber" id="ep-rj" onclick="togglePill(this,'c-amber','儒家经典')">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    儒家经典
+                  </button>
+                  <button class="src-pill off" id="ep-jd" onclick="togglePill(this,'c-violet','经典思想')">经典思想</button>
+                  <button class="src-pill c-action" onclick="showToast('info','知识库选择即将上线')">
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                      <rect x="1" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                      <rect x="6" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                      <rect x="1" y="6" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                      <path d="M8 6.5v4M6 8.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                    </svg>
+                    选择知识库
+                  </button>
+                  <button class="src-pill c-action" onclick="document.getElementById('edrop-file').click()">
+                    <input type="file" id="edrop-file" class="hidden" onchange="showToast('success','文件已上传，正在建立知识库')">
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                      <path d="M5.5 1v7M3 4l2.5-3L8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M1.5 9v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                    上传文件
+                  </button>
+                </div>
+
+                <!-- Elevate action -->
+                <div class="flex items-center justify-between mt-4">
+                  <p class="text-xs text-gray-400">至少选择一项引用来源</p>
+                  <button class="btn-elevate" id="edrop-btn" onclick="runElevateDrop()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z"
+                            stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+                    </svg>
+                    立即升华
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: KB status -->
+              <div>
+                <div class="text-sm font-semibold mb-3" style="color:#1A1A2E;">知识库状态</div>
+                <div class="space-y-2.5">
+                  <div class="kb-card kb-green">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold" style="color:#15803D;">儒家经典</span>
+                      <span class="text-xs font-semibold" style="color:#16A34A;">已就绪</span>
+                    </div>
+                    <p class="text-xs text-gray-500">论语・孟子・道德经・大学・中庸</p>
+                  </div>
+                  <div class="kb-card kb-yellow">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold text-gray-800">学习专栏</span>
+                      <span class="text-xs font-semibold text-amber-600">部分就绪</span>
+                    </div>
+                    <p class="text-xs text-gray-500">重要讲话・历届会议文件</p>
+                  </div>
+                  <div class="kb-card kb-orange">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold text-gray-800">经典思想</span>
+                      <span class="flex items-center gap-1 text-xs font-semibold text-orange-500">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block"></span>准备中
+                      </span>
+                    </div>
+                    <p class="text-xs text-gray-500">数据同步进行中，预计下期上线</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Processing state (hidden) -->
+            <div id="edrop-processing" class="hidden px-6 pb-5">
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl" style="background:#F0FBFF;border:1px solid #BAE6FD;">
+                <div class="w-5 h-5 rounded-full border-2 spin flex-shrink-0" style="border-color:#00A0DF;border-top-color:transparent;"></div>
+                <span class="text-sm font-medium" style="color:#0082B8;" id="edrop-proc-txt">正在检索经典语录，智能匹配语义相关引文…</span>
+              </div>
+            </div>
+
+            <!-- Result (hidden) -->
+            <div id="edrop-result" class="hidden px-6 pb-6">
+              <div class="border-t pt-5 mb-5" style="border-color:#F0F2F5;">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-semibold" style="color:#1A1A2E;">升华结果</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#DCFCE7;color:#15803D;">完成</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">AI 已完成改写，高亮部分为嵌入的经典引文</p>
+                <div class="edrop-result prose" id="edrop-result-content"></div>
+                <!-- Source citations -->
+                <div class="mt-4 space-y-2" id="edrop-sources"></div>
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-2 mt-4">
+                  <button class="btn-g text-sm" onclick="showToast('info','下载功能即将上线')">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M6.5 1v8M3.5 6l3 3 3-3M1.5 10v1.5a.7.7 0 00.7.7h8.6a.7.7 0 00.7-.7V10"
+                            stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    下载
+                  </button>
+                  <button class="btn-g text-sm" onclick="navigate('elevate');setTimeout(()=>document.getElementById('elevate-input').value=document.getElementById('edrop-input').value,100)">
+                    进入完整编辑器
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M4.5 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Example comparison (always visible) ── -->
+            <div class="px-6 pb-6 border-t" style="border-color:#F0F2F5;" id="edrop-example">
+              <div class="flex items-center justify-between pt-5 mb-3">
+                <span class="text-sm font-semibold" style="color:#1A1A2E;">示例效果</span>
+                <span class="text-xs text-gray-400">升华前 → 升华后</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="cmp-before">
+                  <div class="text-xs font-medium text-gray-400 mb-2.5">原文</div>
+                  <p class="text-sm text-gray-700 leading-relaxed">
+                    我办公室在项目推进过程中，始终坚持规范管理、有序推进，确保各项工作既合规又高效。
+                  </p>
+                </div>
+                <div class="cmp-after">
+                  <div class="text-xs font-semibold mb-2.5" style="color:#D97706;">升华后</div>
+                  <p class="text-sm leading-relaxed text-gray-800">
+                    我办公室在项目推进过程中，始终坚持规范管理、有序推进，<span class="quote-hl">《论语·子路》有云："名不正则言不顺，言不顺则事不成"</span>，确保各项工作既合规又高效。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <!-- ── Expert section ── -->
@@ -1664,6 +1889,101 @@ const ELEVATE_DIFF = `
 <p class="mb-3">工作中也<span class="d-del">存在一些问题，主要是创新能力不足，工作方法比较单一，还需要进一步提升</span><span class="d-add">暴露出一些短板弱项：创新驱动能力有待加强，工作方式方法亟待丰富，与高质量发展要求相比仍存在差距，需有的放矢加以解决</span>。</p>
 <p class="mb-3 font-semibold">三、下一步打算</p>
 <p><span class="d-del">坚持问题导向，有针对性地补短板强弱项，推动各项工作再上新台阶，为实现高质量发展目标而不懈努力。</span><span class="d-add">深入贯彻落实中央经济工作会议精神，坚持问题导向与目标导向相结合，<strong>锚定高质量发展首要任务</strong>，以"功成不必在我、功成必定有我"的担当精神，在补短板、强弱项上下真功夫，奋力推动各项工作迈上新台阶，以优异成绩迎接新的历史考验。</span></p>`;
+
+// ══════════════════════════════════════════════
+// ELEVATE DROPDOWN (homepage inline panel)
+// ══════════════════════════════════════════════
+function toggleElevatePanel() {
+  const panel = document.getElementById('elevate-drop');
+  const btn   = document.getElementById('elevate-toggle-btn');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    btn.classList.add('e-active');
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
+  } else {
+    panel.classList.add('hidden');
+    btn.classList.remove('e-active');
+    // reset state
+    document.getElementById('edrop-processing').classList.add('hidden');
+    document.getElementById('edrop-result').classList.add('hidden');
+    document.getElementById('edrop-example').classList.remove('hidden');
+    const eb = document.getElementById('edrop-btn');
+    eb.disabled = false;
+    eb.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg> 立即升华`;
+  }
+}
+
+function togglePill(btn, colorClass, label) {
+  const isOff = btn.classList.contains('off');
+  if (isOff) {
+    btn.classList.remove('off');
+    btn.classList.add(colorClass);
+    btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ${label}`;
+  } else {
+    btn.classList.remove(colorClass);
+    btn.classList.add('off');
+    btn.textContent = label;
+  }
+}
+
+function runElevateDrop() {
+  const input = document.getElementById('edrop-input').value.trim();
+  if (!input) { showToast('error','请先粘贴或输入需要升华的文段'); return; }
+  // Check at least one source
+  const hasSource = ['ep-lx','ep-rj','ep-jd'].some(id => !document.getElementById(id).classList.contains('off'));
+  if (!hasSource) { showToast('error','请至少选择一项引用来源'); return; }
+
+  const procEl   = document.getElementById('edrop-processing');
+  const resultEl = document.getElementById('edrop-result');
+  const exampleEl= document.getElementById('edrop-example');
+  const btnEl    = document.getElementById('edrop-btn');
+  const procTxt  = document.getElementById('edrop-proc-txt');
+
+  btnEl.disabled = true;
+  btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" class="spin" fill="none" style="border:none"><path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 5.8" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg> 升华中…`;
+  procEl.classList.remove('hidden');
+  exampleEl.classList.add('hidden');
+
+  const steps = [
+    { t:'正在解析文章主题与核心观点…', ms:800 },
+    { t:'检索儒家经典数据库，匹配语义相关引文…', ms:2200 },
+    { t:'智能嵌入引文，调整语句结构与格局…', ms:4000 },
+  ];
+  steps.forEach(s => setTimeout(() => { if(procTxt) procTxt.textContent = s.t; }, s.ms));
+
+  setTimeout(() => {
+    // build result HTML with diff
+    const resultTxt = input.length < 30
+      ? input
+      : input.substring(0, Math.floor(input.length * 0.6));
+    const suffix = input.length < 30 ? '' : input.substring(Math.floor(input.length * 0.6));
+
+    document.getElementById('edrop-result-content').innerHTML =
+      `<p class="text-sm leading-relaxed text-gray-800" style="line-height:2;">` +
+      resultTxt +
+      `<span class="quote-hl">《论语·子路》有云："名不正则言不顺，言不顺则事不成"</span>` +
+      suffix +
+      `</p>`;
+
+    document.getElementById('edrop-sources').innerHTML = `
+      <div class="flex items-start gap-3 p-3 rounded-xl" style="background:#FFFBEB;border:1px solid #FDE68A;">
+        <span class="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0" style="background:#FEF3C7;color:#D97706;">儒家经典</span>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-800">《论语·子路》</p>
+          <p class="text-xs text-gray-500 mt-0.5 leading-relaxed border-l-2 border-amber-300 pl-2 mt-1">
+            "名不正则言不顺，言不顺则事不成，事不成则礼乐不兴……"
+          </p>
+        </div>
+      </div>`;
+
+    procEl.classList.add('hidden');
+    resultEl.classList.remove('hidden');
+    exampleEl.classList.add('hidden');
+    btnEl.disabled = false;
+    btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg> 重新升华`;
+    resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 5200);
+}
 
 // ══════════════════════════════════════════════
 // NAVIGATION
