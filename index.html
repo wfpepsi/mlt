@@ -600,47 +600,54 @@
             <!-- Two-column body -->
             <div class="px-6 py-5" style="display:grid;grid-template-columns:1fr 256px;gap:20px;">
 
-              <!-- Left: Input + sources -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">粘贴需要升华的文段</label>
-                <textarea id="edrop-input" rows="5"
-                  placeholder="粘贴或输入你的文章段落，AI 将自动匹配经典语录并嵌入引文..."
-                  style="height:140px;font-size:13.5px;line-height:1.75;border-color:#E4E7ED;border-radius:10px;"></textarea>
+              <!-- Left: Source selection -->
+              <div class="flex flex-col gap-4">
+                <!-- Content source hint -->
+                <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl" style="background:#F5F7FA;border:1px solid #E8EBF0;">
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="flex-shrink-0 text-gray-400">
+                    <rect x="1.5" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                    <path d="M4.5 5.5h6M4.5 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                  <span class="text-xs text-gray-500">将对<span class="font-medium text-gray-700">对话框中的内容</span>进行升华引用</span>
+                </div>
 
                 <!-- Source chips -->
-                <div class="flex flex-wrap items-center gap-2 mt-3">
-                  <span class="text-xs font-medium text-gray-500 flex-shrink-0">引用来源：</span>
-                  <button class="src-pill c-blue" id="ep-lx" onclick="togglePill(this,'c-blue','学习专栏')">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    学习专栏
-                  </button>
-                  <button class="src-pill c-amber" id="ep-rj" onclick="togglePill(this,'c-amber','儒家经典')">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    儒家经典
-                  </button>
-                  <button class="src-pill off" id="ep-jd" onclick="togglePill(this,'c-violet','经典思想')">经典思想</button>
-                  <button class="src-pill c-action" onclick="showToast('info','知识库选择即将上线')">
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                      <rect x="1" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
-                      <rect x="6" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
-                      <rect x="1" y="6" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
-                      <path d="M8 6.5v4M6 8.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                    </svg>
-                    选择知识库
-                  </button>
-                  <button class="src-pill c-action" onclick="document.getElementById('edrop-file').click()">
-                    <input type="file" id="edrop-file" class="hidden" onchange="showToast('success','文件已上传，正在建立知识库')">
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                      <path d="M5.5 1v7M3 4l2.5-3L8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="M1.5 9v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                    </svg>
-                    上传文件
-                  </button>
+                <div>
+                  <div class="text-xs font-semibold text-gray-600 mb-2.5">选择引用来源
+                    <span class="font-normal text-gray-400 ml-1">（至少选一项）</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button class="src-pill c-blue" id="ep-lx" onclick="togglePill(this,'c-blue','学习专栏')">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      学习专栏
+                    </button>
+                    <button class="src-pill c-amber" id="ep-rj" onclick="togglePill(this,'c-amber','儒家经典')">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      儒家经典
+                    </button>
+                    <button class="src-pill off" id="ep-jd" onclick="togglePill(this,'c-violet','经典思想')">经典思想</button>
+                    <button class="src-pill c-action" onclick="showToast('info','知识库选择即将上线')">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        <rect x="1" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <rect x="6" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <rect x="1" y="6" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <path d="M8 6.5v4M6 8.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      </svg>
+                      选择知识库
+                    </button>
+                    <button class="src-pill c-action" onclick="document.getElementById('edrop-file').click()">
+                      <input type="file" id="edrop-file" class="hidden" onchange="showToast('success','文件已上传，正在建立知识库')">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        <path d="M5.5 1v7M3 4l2.5-3L8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1.5 9v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                      </svg>
+                      上传文件
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Elevate action -->
-                <div class="flex items-center justify-between mt-4">
-                  <p class="text-xs text-gray-400">至少选择一项引用来源</p>
+                <div class="flex items-center justify-end pt-2">
                   <button class="btn-elevate" id="edrop-btn" onclick="runElevateDrop()">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z"
@@ -710,7 +717,7 @@
                     </svg>
                     下载
                   </button>
-                  <button class="btn-g text-sm" onclick="navigate('elevate');setTimeout(()=>document.getElementById('elevate-input').value=document.getElementById('edrop-input').value,100)">
+                  <button class="btn-g text-sm" onclick="navigate('elevate');setTimeout(()=>document.getElementById('elevate-input').value=document.getElementById('home-input').value,100)">
                     进入完整编辑器
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M4.5 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1927,8 +1934,9 @@ function togglePill(btn, colorClass, label) {
 }
 
 function runElevateDrop() {
-  const input = document.getElementById('edrop-input').value.trim();
-  if (!input) { showToast('error','请先粘贴或输入需要升华的文段'); return; }
+  // Read from the main homepage dialog box
+  const input = document.getElementById('home-input').value.trim();
+  if (!input) { showToast('error','请先在对话框中输入或粘贴需要升华的内容'); return; }
   // Check at least one source
   const hasSource = ['ep-lx','ep-rj','ep-jd'].some(id => !document.getElementById(id).classList.contains('off'));
   if (!hasSource) { showToast('error','请至少选择一项引用来源'); return; }
