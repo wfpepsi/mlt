@@ -190,7 +190,15 @@
       font-size: 11px; padding: 2px 8px; border-radius: 4px;
       background: #F3F4F6; color: #6B7280; font-weight: 500;
     }
-    /* ── Elevate dropdown panel ── */
+    /* ── Feature row horizontal scroll ── */
+    .feat-row {
+      display: flex; align-items: center; gap: 8px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding-bottom: 2px; padding-top: 2px;
+    }
+    .feat-row::-webkit-scrollbar { display: none; }
+    .feat-row .feat-btn { flex-shrink: 0; }
+    /* Elevate dropdown panel */
     @keyframes slideDown {
       from { opacity:0; transform:translateY(-8px); }
       to   { opacity:1; transform:translateY(0); }
@@ -479,9 +487,10 @@
           </div>
         </div>
 
-        <!-- ── Feature row ── -->
-        <div class="flex flex-wrap items-center justify-center gap-2 mt-4" style="max-width:740px;">
-          <!-- Existing features -->
+        <!-- ── Feature row (横向滚动，不换行) ── -->
+        <div class="feat-row mt-4 w-full" style="max-width:740px;">
+
+          <!-- 1. 写作 -->
           <button class="feat-btn" onclick="navigate('writing')">
             <span class="feat-icon" style="background:#F0FDF4;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -491,47 +500,8 @@
             </span>
             写作
           </button>
-          <button class="feat-btn" onclick="navigate('research')">
-            <span class="feat-icon" style="background:#FFF7ED;">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="6" cy="6" r="4" stroke="#EA580C" stroke-width="1.3"/>
-                <path d="M9 9l3.5 3.5" stroke="#EA580C" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </span>
-            深度研究
-          </button>
-          <button class="feat-btn" onclick="navigate('ppt')">
-            <span class="feat-icon" style="background:#FFF1F2;">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <rect x="1" y="2" width="12" height="8" rx="1.2" stroke="#E11D48" stroke-width="1.3"/>
-                <path d="M5 12.5l2-2.5 2 2.5M4.5 12.5h5" stroke="#E11D48" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            AI PPT
-          </button>
-          <button class="feat-btn" onclick="navigate('meeting')">
-            <span class="feat-icon" style="background:#EFF6FF;">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <rect x="1.5" y="2.5" width="11" height="9" rx="1.2" stroke="#2563EB" stroke-width="1.3"/>
-                <path d="M4.5 2.5V1.5M9.5 2.5V1.5M1.5 6h11" stroke="#2563EB" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </span>
-            会议纪要
-          </button>
-          <button class="feat-btn" onclick="navigate('reading')">
-            <span class="feat-icon" style="background:#F5F3FF;">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M2 3.5C2 3.5 4 2.5 7 3.5s5 1 5 1V12s-2-1-5-1-5 1-5 1V3.5z" stroke="#7C3AED" stroke-width="1.3" stroke-linejoin="round"/>
-                <path d="M7 3.5v8" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-            </span>
-            阅读
-          </button>
 
-          <!-- Divider -->
-          <div class="w-px h-6 mx-1" style="background:#E8EBF0;"></div>
-
-          <!-- NEW: 润色 -->
+          <!-- 2. 润色 New -->
           <button class="feat-btn feat-new" onclick="navigate('polish')">
             <span class="feat-icon" style="background:#E0F4FB;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -544,7 +514,7 @@
             <span class="feat-new-tag">New</span>
           </button>
 
-          <!-- NEW: 升华 -->
+          <!-- 3. 升华 New (dropdown toggle) -->
           <button class="feat-btn feat-new" id="elevate-toggle-btn" onclick="toggleElevatePanel()">
             <span class="feat-icon" style="background:#E0F4FB;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -556,7 +526,19 @@
             <span class="feat-new-tag">New</span>
           </button>
 
-          <!-- NEW: 排版 -->
+          <!-- 4. 校对 New -->
+          <button class="feat-btn feat-new" onclick="navigate('writing')">
+            <span class="feat-icon" style="background:#F5F3FF;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2.5 4h6M2.5 7h5M2.5 10h3.5" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round"/>
+                <path d="M10 6l1.5 1.5 2.5-3" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            校对
+            <span class="feat-new-tag">New</span>
+          </button>
+
+          <!-- 5. 排版 New -->
           <button class="feat-btn feat-new" onclick="navigate('layout')">
             <span class="feat-icon" style="background:#E0F4FB;">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -569,6 +551,41 @@
             排版
             <span class="feat-new-tag">New</span>
           </button>
+
+          <!-- 6. AI PPT -->
+          <button class="feat-btn" onclick="navigate('ppt')">
+            <span class="feat-icon" style="background:#FFF1F2;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="2" width="12" height="8" rx="1.2" stroke="#E11D48" stroke-width="1.3"/>
+                <path d="M5 12.5l2-2.5 2 2.5M4.5 12.5h5" stroke="#E11D48" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            AI PPT
+          </button>
+
+          <!-- 7. 深度研究报告 -->
+          <button class="feat-btn" onclick="navigate('research')">
+            <span class="feat-icon" style="background:#FFF7ED;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="5.5" cy="5.5" r="3.5" stroke="#EA580C" stroke-width="1.3"/>
+                <path d="M8.5 8.5l3.5 3.5" stroke="#EA580C" stroke-width="1.3" stroke-linecap="round"/>
+                <path d="M3.5 5.5h4M5.5 3.5v4" stroke="#EA580C" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </span>
+            深度研究报告
+          </button>
+
+          <!-- 8. 会议纪要 -->
+          <button class="feat-btn" onclick="navigate('meeting')">
+            <span class="feat-icon" style="background:#EFF6FF;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1.5" y="2.5" width="11" height="9" rx="1.2" stroke="#2563EB" stroke-width="1.3"/>
+                <path d="M4.5 2.5V1.5M9.5 2.5V1.5M1.5 6h11" stroke="#2563EB" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </span>
+            会议纪要
+          </button>
+
         </div>
 
         <!-- ── ELEVATE DROPDOWN PANEL ── -->
