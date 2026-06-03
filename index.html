@@ -190,7 +190,60 @@
       font-size: 11px; padding: 2px 8px; border-radius: 4px;
       background: #F3F4F6; color: #6B7280; font-weight: 500;
     }
-    /* ── Feature row horizontal scroll ── */
+    /* ── Polish editor page ── */
+    #page-polish.active { display:flex; flex-direction:column; min-height:100vh; background:#F0F2F5; }
+    .pe-step { display:flex; align-items:center; gap:0; font-size:12.5px; white-space:nowrap; }
+    .pe-step-item { color:#B0B7C3; }
+    .pe-step-item.done { color:#9CA3AF; }
+    .pe-step-item.active { color:var(--p); font-weight:600; border-bottom:2px solid var(--p); padding-bottom:1px; }
+    .pe-step-sep { color:#D1D5DB; margin:0 7px; font-size:12px; }
+    /* Left tool sidebar */
+    .pe-tool-btn {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:9px 4px; border-radius:8px; cursor:pointer; border:none;
+      background:none; font-family:inherit; transition:all .12s; width:60px;
+    }
+    .pe-tool-btn:hover { background:#F3F4F6; }
+    .pe-tool-btn.active { background:var(--p-lt); }
+    .pe-tool-icon { font-size:15px; font-weight:700; }
+    .pe-tool-label { font-size:10px; line-height:1.2; text-align:center; }
+    /* Editor toolbar */
+    .pe-toolbar-btn {
+      display:inline-flex; align-items:center; gap:3px;
+      padding:3px 6px; border-radius:4px; border:none;
+      background:none; font-family:inherit; font-size:12.5px;
+      color:#374151; cursor:pointer; transition:all .1s;
+    }
+    .pe-toolbar-btn:hover { background:#F3F4F6; }
+    .pe-toolbar-sep { width:1px; height:16px; background:#E5E7EB; margin:0 3px; }
+    /* Right panel chips */
+    .rp-chip {
+      padding:4px 11px; border-radius:5px; font-size:12px; font-weight:500;
+      cursor:pointer; border:1px solid #E5E7EB; background:#F5F6F8; color:#4B5563;
+      transition:all .12s; font-family:inherit;
+    }
+    .rp-chip:hover { border-color:#C5E9F7; }
+    .rp-chip.on { background:#E8F5FF; border-color:var(--p); color:var(--p); }
+    .rp-chip.custom { border-style:dashed; color:#9CA3AF; background:transparent; }
+    /* Right panel tabs */
+    .rp-tab {
+      padding:10px 12px; font-size:13px; color:#9CA3AF; border:none;
+      background:none; cursor:pointer; border-bottom:2px solid transparent;
+      font-family:inherit; transition:all .12s; font-weight:500;
+    }
+    .rp-tab.on { color:var(--p); border-bottom-color:var(--p); }
+    /* Document page */
+    .doc-page {
+      max-width:760px; margin:24px auto 60px; background:white;
+      box-shadow:0 2px 12px rgba(0,0,0,.08); padding:72px 90px;
+      min-height:900px; font-family:'仿宋 GB2312','FangSong','仿宋',serif;
+      font-size:16px; line-height:2; color:#1a1a1a; position:relative;
+    }
+    .doc-watermark {
+      position:absolute; opacity:.04; font-size:60px; font-weight:700;
+      transform:rotate(-35deg); color:#374151; pointer-events:none; user-select:none;
+    }
+
     .feat-row-wrap { position: relative; }
     .feat-row {
       display: flex; align-items: center; gap: 8px;
@@ -906,260 +959,253 @@
          PAGE: POLISH 润色
     ════════════════════════════════════ -->
     <div id="page-polish" class="page">
-      <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center gap-3 z-10">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--p-lt);">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 1.5C5 1.5 2.5 4 2.5 7c0 1.6.7 3 1.8 4L1.5 14.5H7L8.5 12.3A5.5 5.5 0 108 1.5z"
-                  stroke="#00A0DF" stroke-width="1.4" stroke-linejoin="round"/>
-            <path d="M6 7h4M8 5v4" stroke="#00A0DF" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
+      <!-- ── Top step navigation ── -->
+      <div class="flex-shrink-0 bg-white border-b flex items-center justify-between px-5" style="height:44px;border-color:#EBEDF0;">
+        <div class="pe-step">
+          <span class="pe-step-item done">选择场景</span>
+          <span class="pe-step-sep">→</span>
+          <span class="pe-step-item done">信息输入</span>
+          <span class="pe-step-sep">→</span>
+          <span class="pe-step-item done">公文生成</span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item active flex items-center gap-1">
+            <span style="font-size:13px;">Aα</span> 内容润色
+          </span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item flex items-center gap-1">
+            <span style="font-size:13px;font-weight:700;">中</span> 内容校对
+          </span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item flex items-center gap-1">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="4" height="5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="5" height="2.5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="11" height="2.5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="5" width="5" height="1.5" rx=".4" stroke="currentColor" stroke-width="1.2"/></svg>
+            一键排版
+          </span>
         </div>
-        <div>
-          <h1 class="text-lg font-semibold tracking-tight text-gray-900">润色</h1>
-          <p class="text-xs text-gray-500">语言优化 · 风格调整 · 表达提升</p>
-        </div>
-        <!-- Steps -->
-        <div class="ml-auto flex items-center gap-1">
-          <div class="s-dot on" id="p-s1">1</div>
-          <div class="s-line" id="p-l1"></div>
-          <div class="s-dot" id="p-s2">2</div>
-          <div class="s-line" id="p-l2"></div>
-          <div class="s-dot" id="p-s3">3</div>
-          <div class="ml-3 text-xs text-gray-400" id="p-step-label">输入与文风</div>
+        <div class="flex items-center gap-2">
+          <button class="btn-g text-xs" onclick="navigate('home')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M8.5 3L4.5 6.5l4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            返回
+          </button>
+          <button class="text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer"
+                  style="background:var(--p);border:none;font-family:inherit;">权益详情</button>
         </div>
       </div>
 
-      <div class="max-w-5xl mx-auto px-8 py-8">
+      <!-- ── Editor body (left sidebar + editor + right panel) ── -->
+      <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 44px);">
 
-        <!-- Panel 1: Input + Style -->
-        <div id="pp1">
-          <div class="grid grid-cols-2 gap-6">
-            <!-- Text input -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                输入待润色文章
-                <span class="text-xs font-normal text-gray-400 ml-1.5">支持直接粘贴</span>
-              </label>
-              <textarea id="polish-input" rows="18"
-                placeholder="请粘贴或输入需要润色的文章内容…"
-                style="height:400px;line-height:1.85;">关于加强基层治理工作的通知
+        <!-- Left tool sidebar -->
+        <div class="flex-shrink-0 bg-white border-r flex flex-col items-center pt-3 gap-1" style="width:66px;border-color:#EBEDF0;">
+          <button class="pe-tool-btn active" onclick="polishTool('polish')">
+            <span class="pe-tool-icon" style="color:var(--p);">Aα</span>
+            <span class="pe-tool-label" style="color:var(--p);">内容润色</span>
+          </button>
+          <button class="pe-tool-btn" onclick="polishTool('proofread')">
+            <span class="pe-tool-icon text-gray-500" style="font-size:16px;font-weight:800;">中</span>
+            <span class="pe-tool-label text-gray-500">内容校对</span>
+          </button>
+          <button class="pe-tool-btn" onclick="navigate('layout')">
+            <span class="pe-tool-icon flex items-center justify-center" style="height:20px;">
+              <svg width="18" height="16" viewBox="0 0 18 16" fill="none">
+                <rect x="1" y="1" width="6" height="7.5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="10" y="1" width="7" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="1" y="11" width="16" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="10" y="7" width="7" height="2" rx=".6" stroke="#6B7280" stroke-width="1.3"/>
+              </svg>
+            </span>
+            <span class="pe-tool-label text-gray-500">一键排版</span>
+          </button>
+          <button class="pe-tool-btn" onclick="showToast('info','公文素材功能即将上线')">
+            <span class="pe-tool-icon flex items-center justify-center" style="height:20px;">
+              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                <path d="M3 1h7l4 4v12H3V1z" stroke="#6B7280" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M10 1v5h4M5 9h6M5 12h4" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="pe-tool-label text-gray-500">公文素材</span>
+          </button>
+        </div>
 
-各单位：
-
-为切实加强基层治理，推动社区建设稳步发展，特制定以下措施。要强化网格化管理，把每个社区划分成若干小网格，安排专人负责，实现对居民情况的掌握和管理。
-
-要注重信息化手段的运用，建设智慧社区平台，打通各部门之间的数据壁垒，提高工作效率。要加强社区志愿者队伍建设，吸纳更多有爱心有能力的居民参与社区服务。
-
-要完善社区议事机制，让居民有地方反映问题和诉求，真正实现共建共治共享的基层治理格局。
-
-特此通知。</textarea>
-              <div class="flex items-center justify-between mt-2">
-                <span class="text-xs text-gray-400">建议 500–5000 字</span>
-                <span class="text-xs text-gray-400" id="polish-char-count">238 字</span>
-              </div>
-            </div>
-
-            <!-- Style panel -->
-            <div class="flex flex-col gap-5">
-              <!-- Style chips -->
-              <div>
-                <div class="flex items-center justify-between mb-2.5">
-                  <label class="text-sm font-medium text-gray-700">选择润色文风</label>
-                  <span class="text-xs px-2 py-0.5 rounded font-medium" style="background:var(--p-lt);color:var(--p);">已推荐：公文</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                  <button class="chip" onclick="pickStyle(this,'formal')">正式</button>
-                  <button class="chip on" onclick="pickStyle(this,'official')">公文</button>
-                  <button class="chip" onclick="pickStyle(this,'reporting')">汇报</button>
-                  <button class="chip" onclick="pickStyle(this,'concise')">精炼</button>
-                  <button class="chip" onclick="pickStyle(this,'expressive')">有感染力</button>
-                  <button class="chip" onclick="pickStyle(this,'custom')">自定义</button>
-                </div>
-                <!-- Custom input -->
-                <div id="custom-style-wrap" class="mt-2 hidden">
-                  <div class="relative">
-                    <input type="text" id="custom-style-txt" maxlength="6" placeholder="输入文风提示词（最多 6 字）">
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400" id="csc">0/6</span>
-                  </div>
-                  <p class="text-xs text-gray-400 mt-1">如：简洁有力、鼓舞人心</p>
-                </div>
-              </div>
-
-              <!-- Style description -->
-              <div class="rounded-xl p-4" style="background:#F8F9FA;border:1px solid #ECEEF1;">
-                <div class="text-xs font-medium text-gray-500 mb-1.5">文风说明</div>
-                <div class="text-xs text-gray-600 leading-relaxed" id="style-desc">
-                  <strong>公文文风：</strong>措辞严谨规范，结构层次分明，符合党政机关公文语言规范，避免口语化，行文简洁庄重。
-                </div>
-              </div>
-
-              <!-- Scope options -->
-              <div>
-                <div class="text-sm font-medium text-gray-700 mb-2.5">润色范围</div>
-                <div class="space-y-2.5">
-                  <label class="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" checked style="accent-color:var(--p);width:14px;height:14px;">
-                    <span class="text-sm text-gray-700">修正病句，优化语法</span>
-                  </label>
-                  <label class="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" checked style="accent-color:var(--p);width:14px;height:14px;">
-                    <span class="text-sm text-gray-700">调整表达风格，提升可读性</span>
-                  </label>
-                  <label class="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" checked style="accent-color:var(--p);width:14px;height:14px;">
-                    <span class="text-sm text-gray-700">精炼冗余词汇，保持语义完整</span>
-                  </label>
-                  <label class="flex items-center gap-2.5 cursor-pointer">
-                    <input type="checkbox" style="accent-color:var(--p);width:14px;height:14px;">
-                    <span class="text-sm text-gray-700">调整段落结构<span class="text-gray-400 text-xs ml-1">（谨慎使用）</span></span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Info note -->
-              <div class="flex items-start gap-2 text-xs text-gray-500 mt-auto">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="mt-0.5 flex-shrink-0">
-                  <circle cx="6.5" cy="6.5" r="5" stroke="#9CA3AF" stroke-width="1.2"/>
-                  <path d="M6.5 6v3M6.5 4.5v.5" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
-                </svg>
-                润色不会引入额外素材，仅优化文章语言表达
-              </div>
-            </div>
+        <!-- Editor main area -->
+        <div class="flex-1 overflow-auto" style="background:#F0F2F5;">
+          <!-- Toolbar -->
+          <div class="flex-shrink-0 bg-white border-b flex items-center flex-wrap gap-0.5 px-3 py-1.5" style="border-color:#EBEDF0;">
+            <button class="pe-toolbar-btn" title="撤销">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 6V3l-1.5 3H2zm-1.5 0C1.1 3.5 3.5 2 6 2a5 5 0 110 10 5 5 0 01-4-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="pe-toolbar-btn" title="重做">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 6V3l1.5 3H12zm1.5 0C12.9 3.5 10.5 2 8 2a5 5 0 100 10 5 5 0 004-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="pe-toolbar-btn" title="清除格式">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 2h8l-3 5v4l-2-1V7L3 2zM1 12h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn font-medium px-2">正文 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn font-bold text-sm">B</button>
+            <button class="pe-toolbar-btn underline text-sm">U</button>
+            <button class="pe-toolbar-btn italic text-sm">I</button>
+            <button class="pe-toolbar-btn text-sm">A<span style="color:#E11D48;font-size:8px;">▼</span></button>
+            <button class="pe-toolbar-btn text-sm">A<span style="background:#E11D48;color:white;font-size:8px;padding:0 1px;">▼</span></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn px-2">三号 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn px-2">黑体 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn px-2">1 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 3h11M1 6.5h8M1 10h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3h9M1 6.5h11M2 10h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 3h7M1 6.5h11M4 10h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 3h10M3.5 6.5h7M1.5 10h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2.5h9M2 5h7M2 7.5h9M2 10h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/><path d="M10 8l2 2-2 2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
 
-          <div class="mt-6 flex items-center justify-end gap-3">
-            <button class="btn-s" onclick="navigate('home')">取消</button>
-            <button class="btn-p" onclick="runPolish()">
+          <!-- Document page -->
+          <div class="doc-page" id="polish-doc">
+            <!-- Watermarks -->
+            <div class="doc-watermark" style="top:120px;left:60px;">281443</div>
+            <div class="doc-watermark" style="top:340px;left:80px;font-size:13px;">2025-06-03 16:18</div>
+            <div class="doc-watermark" style="top:580px;left:50px;">281443</div>
+            <div class="doc-watermark" style="top:800px;left:70px;font-size:13px;">2025-06-03 16:18</div>
+
+            <!-- Document content -->
+            <h1 class="text-center font-bold mb-8" style="font-size:22px;font-family:'方正小标宋','SimHei',sans-serif;letter-spacing:1px;">
+              关于颁发本年度科学技术奖励的决定
+            </h1>
+            <p class="mb-4" style="text-indent:2em;">各省、自治区、直辖市人民政府，国务院各部委、各直属机构：</p>
+            <p class="mb-4" style="text-indent:2em;">
+              中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。为深入贯彻习近平新时代中国特色社会主义思想和党的二十大精神，深入实施科教兴国战略、人才强国战略、创新驱动发展战略，中共中央、国务院决定，对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的科学技术人员和组织给予奖励。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              根据《国家功勋荣誉表彰条例》、《国家科学技术奖励条例》的规定，经国家科学技术奖励评审委员会评审、国家科学技术奖励委员会审定和科技部审核，党中央、国务院批准并报请国家主席习近平签署，授予李德仁院士、薛其坤院士国家最高科学技术奖。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              本年度国家自然科学奖授奖项目49项，其中一等奖3项、二等奖46项；国家技术发明奖授奖项目62项，其中特等奖1项、一等奖8项、二等奖53项；国家科学技术进步奖授奖项目139项，其中特等奖2项、一等奖16项、二等奖121项；授予10名外籍专家中华人民共和国国际科学技术合作奖。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              希望受到奖励的科学技术人员和组织，继续发扬科学精神，勇攀科技高峰，在建设科技强国、实现高水平科技自立自强上作出新的更大贡献。
+            </p>
+            <p class="mb-6" style="text-indent:2em;">
+              各地区各部门要认真贯彻落实党中央、国务院关于科技创新的重大决策部署，大力培育和弘扬科学家精神，优化科技创新生态，激发创新创造活力，加快实现高水平科技自立自强，为以中国式现代化全面推进强国建设、民族复兴伟业提供有力支撑。
+            </p>
+            <p class="text-right mb-2">中共中央&emsp;国务院</p>
+            <p class="text-right">二〇二四年六月二十四日</p>
+
+            <!-- Result area (hidden until polish runs) -->
+            <div id="polish-doc-result" class="hidden mt-8 pt-6 border-t" style="border-color:#FDE68A;">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm font-semibold text-gray-800">润色结果</span>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#DCFCE7;color:#15803D;">完成</span>
+                <span class="text-xs text-gray-400 ml-2">已标注修改位置</span>
+              </div>
+              <div id="polish-doc-result-content" class="prose leading-loose" style="font-size:15px;line-height:2.2;"></div>
+            </div>
+          </div>
+        </div><!-- /editor main -->
+
+        <!-- Right panel -->
+        <div class="flex-shrink-0 bg-white border-l flex flex-col" style="width:284px;border-color:#EBEDF0;">
+          <!-- Panel header -->
+          <div class="flex items-center justify-between px-4 py-3.5 border-b flex-shrink-0" style="border-color:#EBEDF0;">
+            <span class="font-semibold text-gray-900" style="font-size:14px;">内容润色</span>
+            <button class="btn-g w-7 h-7 p-0 flex items-center justify-center rounded-lg" onclick="navigate('home')">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 1.4.6 2.7 1.6 3.6L1.5 12.5H6L7 10.6A4.5 4.5 0 107 1.5z"
-                      stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
+            </button>
+          </div>
+
+          <!-- Function tabs -->
+          <div class="flex border-b flex-shrink-0 px-2" style="border-color:#EBEDF0;">
+            <button class="rp-tab on" id="rpt-polish" onclick="rpTab('polish')">润色</button>
+            <button class="rp-tab" id="rpt-rewrite" onclick="rpTab('rewrite')">改写</button>
+            <button class="rp-tab" id="rpt-expand" onclick="rpTab('expand')">扩写</button>
+            <button class="rp-tab" id="rpt-continue" onclick="rpTab('continue')">续写</button>
+            <button class="rp-tab" id="rpt-shorten" onclick="rpTab('shorten')">缩写</button>
+          </div>
+
+          <!-- Panel body (scrollable) -->
+          <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+
+            <!-- 润色内容 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">润色内容</div>
+              <div class="relative">
+                <textarea id="rp-content" rows="5"
+                  placeholder="请输入需要润色的内容"
+                  oninput="document.getElementById('rp-cc').textContent=this.value.length+'/2500'"
+                  maxlength="2500"
+                  style="height:110px;font-size:13px;line-height:1.7;border-color:#E4E7ED;border-radius:8px;resize:none;padding-bottom:20px;"></textarea>
+                <span class="absolute bottom-2 right-3 text-xs text-gray-400" id="rp-cc">0/2500</span>
+              </div>
+            </div>
+
+            <!-- 优化方向 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                优化方向
+                <span class="font-normal text-gray-400 ml-1">（多选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" onclick="toggleChip(this)">通顺表达</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增强感情</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增强说服力</button>
+                <button class="rp-chip" onclick="toggleChip(this)">提升文采</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增加细节</button>
+                <button class="rp-chip custom" onclick="showToast('info','自定义输入即将支持')">自定义输入</button>
+              </div>
+            </div>
+
+            <!-- 语言风格 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                语言风格
+                <span class="font-normal text-gray-400 ml-1">（多选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" onclick="toggleChip(this)">正式</button>
+                <button class="rp-chip" onclick="toggleChip(this)">通俗</button>
+                <button class="rp-chip" onclick="toggleChip(this)">幽默</button>
+                <button class="rp-chip" onclick="toggleChip(this)">专业</button>
+                <button class="rp-chip" onclick="toggleChip(this)">亲切</button>
+                <button class="rp-chip custom" onclick="showToast('info','自定义输入即将支持')">自定义输入</button>
+              </div>
+            </div>
+
+            <!-- 长度要求 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                长度要求
+                <span class="font-normal text-gray-400 ml-1">（单选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" id="len-keep" onclick="pickLength(this)">保持</button>
+                <button class="rp-chip" id="len-short" onclick="pickLength(this)">精简</button>
+                <button class="rp-chip" id="len-long" onclick="pickLength(this)">扩写</button>
+              </div>
+            </div>
+
+            <!-- Processing state -->
+            <div id="rp-processing" class="hidden">
+              <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style="background:#F0FBFF;border:1px solid #BAE6FD;">
+                <div class="w-4 h-4 rounded-full border-2 spin flex-shrink-0" style="border-color:var(--p);border-top-color:transparent;"></div>
+                <span class="text-xs font-medium" style="color:#0082B8;" id="rp-proc-txt">AI 正在润色中…</span>
+              </div>
+            </div>
+
+          </div><!-- /panel body -->
+
+          <!-- Bottom action -->
+          <div class="flex-shrink-0 border-t p-4" style="border-color:#EBEDF0;">
+            <button class="w-full btn-p justify-center py-2.5 text-sm font-semibold" id="rp-run-btn" onclick="runPolishEditor()">
               开始润色
             </button>
           </div>
-        </div>
+        </div><!-- /right panel -->
 
-        <!-- Panel 2: Processing -->
-        <div id="pp2" class="hidden">
-          <div class="flex flex-col items-center justify-center py-24">
-            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" style="background:var(--p-lt);">
-              <svg width="34" height="34" viewBox="0 0 34 34" fill="none" class="spin">
-                <path d="M17 4C10.37 4 5 9.37 5 16" stroke="#00A0DF" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M17 4C23.63 4 29 9.37 29 16" stroke="#00A0DF" stroke-width="2.5" stroke-linecap="round" opacity=".25"/>
-              </svg>
-            </div>
-            <h2 class="text-lg font-semibold text-gray-900 mb-2">AI 正在润色中…</h2>
-            <p class="text-sm text-gray-500 mb-8">分析文章语言，对照公文规范，逐句优化表达</p>
-            <div class="w-80">
-              <div class="flex justify-between text-xs text-gray-500 mb-2">
-                <span id="pp-txt">分析文章结构</span>
-                <span id="pp-pct">20%</span>
-              </div>
-              <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div id="pp-bar" class="h-full rounded-full transition-all duration-500"
-                     style="width:20%;background:linear-gradient(90deg,#00A0DF,#5BC8F0);"></div>
-              </div>
-            </div>
-            <div class="ldots flex gap-2 mt-8"><span></span><span></span><span></span></div>
-            <p class="text-xs text-gray-400 mt-3">预计需要 10–20 秒</p>
-          </div>
-        </div>
-
-        <!-- Panel 3: Result with diff -->
-        <div id="pp3" class="hidden">
-          <!-- Tab bar -->
-          <div class="flex items-center gap-1 p-1 rounded-xl mb-5 w-fit"
-               style="background:#F3F4F6;">
-            <button id="pt-compare" onclick="pTab('compare')"
-                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
-                    style="background:#fff;color:var(--p);box-shadow:0 1px 3px rgba(0,0,0,.08);">对比视图</button>
-            <button id="pt-original" onclick="pTab('original')"
-                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">原文</button>
-            <button id="pt-result" onclick="pTab('result')"
-                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">润色后</button>
-          </div>
-
-          <!-- Compare view -->
-          <div id="pv-compare" class="grid grid-cols-2 gap-6">
-            <div>
-              <div class="flex items-center gap-2 mb-3">
-                <span class="text-sm font-medium text-gray-700">原文</span>
-                <span class="text-xs text-gray-400">238 字</span>
-              </div>
-              <div class="bg-white rounded-xl border border-gray-200 p-5 prose overflow-y-auto" style="height:400px;">
-                <p class="mb-3 font-medium">关于加强基层治理工作的通知</p>
-                <p class="mb-3">各单位：</p>
-                <p class="mb-3">为切实加强基层治理，推动社区建设稳步发展，特制定以下措施。要强化网格化管理，把每个社区划分成若干小网格，安排专人负责，实现对居民情况的掌握和管理。</p>
-                <p class="mb-3">要注重信息化手段的运用，建设智慧社区平台，打通各部门之间的数据壁垒，提高工作效率。要加强社区志愿者队伍建设，吸纳更多有爱心有能力的居民参与社区服务。</p>
-                <p>要完善社区议事机制，让居民有地方反映问题和诉求，真正实现共建共治共享的基层治理格局。</p>
-                <p class="mt-3 text-xs text-gray-400 text-right">特此通知。</p>
-              </div>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 mb-3">
-                <span class="text-sm font-medium text-gray-700">润色后</span>
-                <span class="text-xs text-gray-400">289 字</span>
-                <span class="badge badge-beta ml-auto">公文文风</span>
-              </div>
-              <div id="pv-result-inner" class="bg-white rounded-xl border border-gray-200 p-5 prose overflow-y-auto" style="height:400px;"></div>
-              <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm d-add inline-block"></span>新增 / 替换 51 处</span>
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm d-del inline-block"></span>删除 / 修改 18 处</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Single: original -->
-          <div id="pv-original" class="hidden bg-white rounded-xl border border-gray-200 p-5 prose">
-            <p class="mb-3 font-medium">关于加强基层治理工作的通知</p>
-            <p class="mb-3">各单位：</p>
-            <p class="mb-3">为切实加强基层治理，推动社区建设稳步发展，特制定以下措施。要强化网格化管理，把每个社区划分成若干小网格，安排专人负责，实现对居民情况的掌握和管理。</p>
-            <p class="mb-3">要注重信息化手段的运用，建设智慧社区平台，打通各部门之间的数据壁垒，提高工作效率。要加强社区志愿者队伍建设，吸纳更多有爱心有能力的居民参与社区服务。</p>
-            <p>要完善社区议事机制，让居民有地方反映问题和诉求，真正实现共建共治共享的基层治理格局。</p>
-          </div>
-
-          <!-- Single: result only -->
-          <div id="pv-result-only" class="hidden bg-white rounded-xl border border-gray-200 p-5 prose">
-            <p class="mb-3 font-medium">关于进一步加强基层治理工作的通知</p>
-            <p class="mb-3">各相关单位：</p>
-            <p class="mb-3">为深入贯彻落实上级关于加强基层治理工作的部署要求，全面推进基层社区建设高质量发展，现就有关工作通知如下。一是强化网格化精细管理，将各社区科学划分为若干责任网格，明确专职网格员负责制，切实掌握辖区居民基本情况，实现信息精准采集与动态管理。</p>
-            <p class="mb-3">二是充分运用信息化手段，加快推进智慧社区平台建设，着力打通各职能部门数据共享壁垒，有效提升基层治理工作效能。三是大力加强社区志愿服务队伍建设，广泛吸纳热心公益、能力突出的居民群众积极参与社区服务工作。</p>
-            <p>四是健全完善社区协商议事机制，多渠道畅通居民诉求表达渠道，切实保障群众有序参与社区事务，着力构建共建共治共享的基层治理新格局。</p>
-            <p class="mt-3 text-xs text-gray-400 text-right">特此通知。</p>
-          </div>
-
-          <!-- Actions -->
-          <div class="mt-6 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <button class="btn-s text-sm" onclick="setPolishPanel(1)">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M8.5 3L4.5 6.5l4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                重新润色
-              </button>
-              <button class="btn-g text-sm">继续调整文风</button>
-            </div>
-            <div class="flex items-center gap-2">
-              <button class="btn-g text-sm">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M6.5 1v8M3.5 6l3 3 3-3M1.5 10v1.5a.8.8 0 00.8.8h8.4a.8.8 0 00.8-.8V10"
-                        stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                下载
-              </button>
-              <button class="btn-g text-sm">在线预览</button>
-              <button class="btn-p text-sm" onclick="showToast('success','已在编辑器中打开，可继续修改')">
-                进入编辑器
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M5 3l4 3.5-4 3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
+      </div><!-- /editor body -->
+    </div><!-- /page-polish -->
 
 
     <!-- ════════════════════════════════════
@@ -1976,6 +2022,81 @@ function updateFeatScroll() {
 }
 
 // ══════════════════════════════════════════════
+// POLISH EDITOR PAGE
+// ══════════════════════════════════════════════
+function polishTool(tool) {
+  document.querySelectorAll('.pe-tool-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function rpTab(tab) {
+  ['polish','rewrite','expand','continue','shorten'].forEach(t => {
+    const el = document.getElementById('rpt-'+t);
+    if (el) el.classList.toggle('on', t===tab);
+  });
+}
+
+function toggleChip(btn) {
+  btn.classList.toggle('on');
+}
+
+function pickLength(btn) {
+  ['len-keep','len-short','len-long'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  btn.classList.add('on');
+}
+
+function runPolishEditor() {
+  const content = document.getElementById('rp-content').value.trim();
+  const docText = document.getElementById('polish-doc').innerText.substring(0, 200).trim();
+  const input = content || docText;
+  if (!input) { showToast('error','请先在文档中选中内容或在输入框中粘贴需要润色的文本'); return; }
+
+  const btnEl   = document.getElementById('rp-run-btn');
+  const procEl  = document.getElementById('rp-processing');
+  const procTxt = document.getElementById('rp-proc-txt');
+  const steps   = ['AI 正在润色中…','分析语言结构与文风…','优化表达，提升流畅度…','生成修改标注…'];
+  let si = 0;
+
+  btnEl.disabled = true;
+  btnEl.textContent = '润色中…';
+  procEl.classList.remove('hidden');
+
+  const stepTimer = setInterval(() => {
+    si = (si+1) % steps.length;
+    if (procTxt) procTxt.textContent = steps[si];
+  }, 1200);
+
+  setTimeout(() => {
+    clearInterval(stepTimer);
+    procEl.classList.add('hidden');
+    btnEl.disabled = false;
+    btnEl.textContent = '重新润色';
+
+    // Show result in document
+    const resultEl = document.getElementById('polish-doc-result');
+    const resultContent = document.getElementById('polish-doc-result-content');
+    if (resultEl && resultContent) {
+      resultContent.innerHTML = `
+        <p class="mb-4" style="text-indent:2em;line-height:2.2;">
+          <span class="d-del">中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。</span>
+          <span class="d-add">科技现代化是中国式现代化的重要支柱，全面建成社会主义现代化强国，根本之道在于科技自立自强。</span>
+          为深入贯彻习近平新时代中国特色社会主义思想和党的二十大精神，深入实施科教兴国战略、人才强国战略、创新驱动发展战略，中共中央、国务院决定，<span class="d-del">对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的科学技术人员和组织给予奖励</span><span class="d-add">对在推动科学技术进步、促进经济社会发展、服务国防现代化建设中作出突出贡献的科学技术人员及组织予以表彰奖励</span>。
+        </p>
+        <p style="text-indent:2em;line-height:2.2;">
+          <span class="d-del">希望受到奖励的科学技术人员和组织，继续发扬科学精神，勇攀科技高峰，在建设科技强国、实现高水平科技自立自强上作出新的更大贡献。</span>
+          <span class="d-add">期望受到表彰的科学技术人员及相关组织，持续弘扬严谨求实的科学精神，奋勇攀登科技新高峰，在加快建设科技强国、推动实现高水平科技自立自强的伟大征程中再立新功、再创佳绩。</span>
+        </p>`;
+      resultEl.classList.remove('hidden');
+      resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+    showToast('success','润色完成，已在文档中标注修改位置');
+  }, 4500);
+}
+
+// ══════════════════════════════════════════════
 // ELEVATE DROPDOWN (homepage inline panel)
 // ══════════════════════════════════════════════
 function toggleElevatePanel() {
@@ -2162,7 +2283,7 @@ function setPolishPanel(n) {
 }
 
 function runPolish() {
-  const txt = document.getElementById('polish-input').value.trim();
+  const txt = document.getElementById('rp-content')?.value?.trim() || '';
   if (!txt) { showToast('error','请先输入需要润色的文章内容'); return; }
   setPolishPanel(2);
   const steps = [
