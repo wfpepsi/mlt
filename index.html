@@ -1,0 +1,3091 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>模力通 · 智能办公</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --p: #00A0DF;
+      --p-lt: #E0F4FB;
+      --p-dk: #0082B8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      background: #F7F8FA;
+      color: #1F2937;
+    }
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+    /* ── Sidebar nav ── */
+    .nav-item {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 6px 10px; border-radius: 7px;
+      font-size: 13px; color: #64748B; cursor: pointer;
+      transition: background .1s, color .1s; border: none;
+      background: none; text-align: left; font-weight: 400;
+      letter-spacing: .01em; position: relative;
+      font-family: inherit;
+    }
+    .nav-item:hover { background: #F1F5F9; color: #1E293B; }
+    .nav-item.active { background: rgba(0,160,223,.09); color: #005D8E; font-weight: 600; }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2.5px; background: var(--p); border-radius: 0 2px 2px 0;
+    }
+    /* History items (bottom) */
+    .hist-item {
+      display: flex; align-items: center; gap: 5px;
+      width: 100%; padding: 4.5px 10px; border-radius: 6px;
+      font-size: 11.5px; color: #94A3B8; cursor: pointer;
+      transition: all .1s; border: none; background: none;
+      text-align: left; font-family: inherit;
+    }
+    .hist-item:hover { background: #F8FAFC; color: #475569; }
+    /* ── Buttons ── */
+    .btn-p {
+      background: var(--p); color: #fff; border: none;
+      border-radius: 8px; padding: 8px 18px; font-size: 13.5px;
+      font-weight: 500; cursor: pointer; transition: all .12s;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-p:hover { background: var(--p-dk); }
+    .btn-p:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-s {
+      background: #fff; color: #374151; border: 1.5px solid #E5E7EB;
+      border-radius: 8px; padding: 8px 18px; font-size: 13.5px;
+      font-weight: 500; cursor: pointer; transition: all .12s;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-s:hover { background: #F9FAFB; border-color: #D1D5DB; }
+    .btn-g {
+      background: none; border: none; color: #6B7280;
+      padding: 6px 10px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-family: inherit; transition: all .12s;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-g:hover { background: #F3F4F6; color: #374151; }
+    /* ── Inputs ── */
+    textarea, input[type="text"] {
+      font-family: inherit; font-size: 13.5px;
+      border: 1.5px solid #E5E7EB; border-radius: 8px;
+      padding: 10px 13px; width: 100%; transition: border-color .12s, box-shadow .12s;
+      background: #fff; color: #1F2937; resize: none;
+    }
+    textarea::placeholder, input::placeholder { color: #9CA3AF; }
+    textarea:focus, input:focus {
+      outline: none; border-color: var(--p);
+      box-shadow: 0 0 0 3px rgba(0,160,223,.1);
+    }
+    /* ── Style chips ── */
+    .chip {
+      padding: 5px 13px; border-radius: 6px; font-size: 12.5px;
+      cursor: pointer; border: 1.5px solid #E5E7EB; color: #4B5563;
+      transition: all .12s; background: #fff; font-family: inherit;
+    }
+    .chip:hover { border-color: var(--p); color: var(--p); }
+    .chip.on { border-color: var(--p); background: var(--p-lt); color: var(--p); font-weight: 500; }
+    /* ── Source cards ── */
+    .src-card {
+      padding: 14px 15px; border: 1.5px solid #E5E7EB;
+      border-radius: 10px; cursor: pointer; transition: all .12s; background: #fff;
+    }
+    .src-card:hover { border-color: var(--p); }
+    .src-card.on { border-color: var(--p); background: var(--p-lt); }
+    /* ── Template cards ── */
+    .tpl-card {
+      border: 1.5px solid #E5E7EB; border-radius: 11px;
+      background: #fff; transition: all .14s; overflow: hidden;
+    }
+    .tpl-card:hover { border-color: #C9D0DA; box-shadow: 0 4px 16px rgba(0,0,0,.07); }
+    .tpl-card.on { border-color: var(--p); box-shadow: 0 0 0 3px rgba(0,160,223,.12); }
+    /* ── Quick action cards ── */
+    .qa-card {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 15px; border: 1.5px solid #E5E7EB;
+      border-radius: 11px; background: #fff;
+      cursor: pointer; transition: all .14s; text-align: left;
+    }
+    .qa-card:hover { border-color: var(--p); box-shadow: 0 4px 16px rgba(0,160,223,.1); }
+    .qa-card.hi { border-color: var(--p); background: linear-gradient(140deg,#F0FBFF,#E6F7FD); }
+    /* ── Diff markup ── */
+    .d-add { background: #DCFCE7; color: #166534; border-radius: 3px; padding: 0 2px; }
+    .d-del { background: #FEE2E2; color: #991B1B; text-decoration: line-through; border-radius: 3px; padding: 0 2px; }
+    /* ── Step indicator ── */
+    .s-dot {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 1.5px solid #E5E7EB; display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 600;
+      color: #9CA3AF; transition: all .2s; flex-shrink: 0;
+    }
+    .s-dot.on { border-color: var(--p); background: var(--p); color: #fff; }
+    .s-dot.done { border-color: #10B981; background: #10B981; color: #fff; }
+    .s-line { height: 1px; background: #E5E7EB; width: 36px; }
+    .s-line.done { background: #10B981; }
+    /* ── Badge ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 600;
+    }
+    .badge-new { background: #FEF3C7; color: #D97706; }
+    .badge-beta { background: var(--p-lt); color: var(--p); }
+    .badge-soon { background: #F3F4F6; color: #9CA3AF; }
+    /* ── Loading dots ── */
+    @keyframes ldot { 0%,80%,100%{transform:scale(0);opacity:0} 40%{transform:scale(1);opacity:1} }
+    .ldots span {
+      display: inline-block; width: 7px; height: 7px;
+      border-radius: 50%; background: var(--p);
+      animation: ldot 1.4s infinite ease-in-out;
+    }
+    .ldots span:nth-child(1){animation-delay:-.32s}
+    .ldots span:nth-child(2){animation-delay:-.16s}
+    /* ── Spin ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 1.8s linear infinite; }
+    /* ── Modals ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.32);
+      z-index: 100; display: none; align-items: center; justify-content: center;
+    }
+    .overlay.show { display: flex; }
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 26px; right: 26px; z-index: 999;
+      transform: translateY(18px); opacity: 0;
+      transition: all .25s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
+    /* ── Misc ── */
+    .section-label {
+      font-size: 10.5px; font-weight: 600; letter-spacing: .07em;
+      text-transform: uppercase; color: #BEC3CC; padding: 6px 11px 4px;
+    }
+    .prose { font-size: 13.5px; line-height: 1.9; color: #374151; }
+    .source-tag-lx { background: #FEF3C7; color: #D97706; }
+    .source-tag-jj { background: #EDE9FE; color: #7C3AED; }
+    /* ── Feature tab buttons ── */
+    .feat-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 13px 6px 7px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; color: #3D3D4E;
+      background: #fff; border: 1px solid #E4E7ED;
+      cursor: pointer; transition: all .14s; font-family: inherit;
+      position: relative;
+    }
+    .feat-btn:hover { border-color: #C8CDD8; background: #FAFBFC; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .feat-btn.feat-new { border-color: #C5E9F7; background: #F0FBFF; color: #0082B8; }
+    .feat-btn.feat-new:hover { border-color: var(--p); background: #E0F4FB; box-shadow: 0 2px 8px rgba(0,160,223,.12); }
+    .feat-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .feat-new-tag {
+      font-size: 9.5px; font-weight: 700; color: var(--p);
+      padding: 1px 4px; border-radius: 3px;
+      background: rgba(0,160,223,.12); margin-left: 1px;
+    }
+    /* ── Expert cards ── */
+    .expert-card {
+      background: #fff; border: 1px solid #E8EBF0; border-radius: 12px;
+      padding: 14px; cursor: pointer; transition: all .14s;
+    }
+    .expert-card:hover { border-color: #C8CDD8; box-shadow: 0 4px 16px rgba(0,0,0,.07); transform: translateY(-1px); }
+    .expert-tag {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: #F3F4F6; color: #6B7280; font-weight: 500;
+    }
+    /* ── Polish editor page ── */
+    #page-polish.active { display:flex; flex-direction:column; min-height:100vh; background:#F0F2F5; }
+    .pe-step { display:flex; align-items:center; gap:0; font-size:12.5px; white-space:nowrap; }
+    .pe-step-item { color:#B0B7C3; }
+    .pe-step-item.done { color:#9CA3AF; }
+    .pe-step-item.active { color:var(--p); font-weight:600; border-bottom:2px solid var(--p); padding-bottom:1px; }
+    .pe-step-sep { color:#D1D5DB; margin:0 7px; font-size:12px; }
+    /* Left tool sidebar */
+    .pe-tool-btn {
+      display:flex; flex-direction:column; align-items:center; gap:3px;
+      padding:9px 4px; border-radius:8px; cursor:pointer; border:none;
+      background:none; font-family:inherit; transition:all .12s; width:60px;
+    }
+    .pe-tool-btn:hover { background:#F3F4F6; }
+    .pe-tool-btn.active { background:var(--p-lt); }
+    .pe-tool-icon { font-size:15px; font-weight:700; }
+    .pe-tool-label { font-size:10px; line-height:1.2; text-align:center; }
+    /* Editor toolbar */
+    .pe-toolbar-btn {
+      display:inline-flex; align-items:center; gap:3px;
+      padding:3px 6px; border-radius:4px; border:none;
+      background:none; font-family:inherit; font-size:12.5px;
+      color:#374151; cursor:pointer; transition:all .1s;
+    }
+    .pe-toolbar-btn:hover { background:#F3F4F6; }
+    .pe-toolbar-sep { width:1px; height:16px; background:#E5E7EB; margin:0 3px; }
+    /* Right panel chips */
+    .rp-chip {
+      padding:4px 11px; border-radius:5px; font-size:12px; font-weight:500;
+      cursor:pointer; border:1px solid #E5E7EB; background:#F5F6F8; color:#4B5563;
+      transition:all .12s; font-family:inherit;
+    }
+    .rp-chip:hover { border-color:#C5E9F7; }
+    .rp-chip.on { background:#E8F5FF; border-color:var(--p); color:var(--p); }
+    .rp-chip.custom { border-style:dashed; color:#9CA3AF; background:transparent; }
+    /* Right panel tabs */
+    .rp-tab {
+      padding:10px 12px; font-size:13px; color:#9CA3AF; border:none;
+      background:none; cursor:pointer; border-bottom:2px solid transparent;
+      font-family:inherit; transition:all .12s; font-weight:500;
+    }
+    .rp-tab.on { color:var(--p); border-bottom-color:var(--p); }
+    /* Document page */
+    .doc-page {
+      max-width:760px; margin:24px auto 60px; background:white;
+      box-shadow:0 2px 12px rgba(0,0,0,.08); padding:72px 90px;
+      min-height:900px; font-family:'仿宋 GB2312','FangSong','仿宋',serif;
+      font-size:16px; line-height:2; color:#1a1a1a; position:relative;
+    }
+    .doc-watermark {
+      position:absolute; opacity:.04; font-size:60px; font-weight:700;
+      transform:rotate(-35deg); color:#374151; pointer-events:none; user-select:none;
+    }
+
+    .feat-row-wrap { position: relative; }
+    .feat-row {
+      display: flex; align-items: center; gap: 8px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding-bottom: 2px; padding-top: 2px;
+    }
+    .feat-row::-webkit-scrollbar { display: none; }
+    .feat-row .feat-btn { flex-shrink: 0; }
+    /* Scroll arrow zones */
+    .feat-scroll-zone {
+      position: absolute; top: 0; bottom: 0; width: 46px;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 5; cursor: pointer;
+      transition: opacity .18s;
+      pointer-events: auto;
+    }
+    .feat-sl { left:0; background:linear-gradient(to right,#F5F7FA 40%,rgba(245,247,250,0)); }
+    .feat-sr { right:0; background:linear-gradient(to left, #F5F7FA 40%,rgba(245,247,250,0)); }
+    .feat-scroll-zone.hide { opacity:0; pointer-events:none; }
+    .feat-scroll-zone svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.12)); }
+    /* Elevate dropdown panel */
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .elevate-panel {
+      background: #fff; border: 1px solid #E4E7ED;
+      border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      overflow: hidden; animation: slideDown .2s ease;
+      margin-top: 10px;
+    }
+    /* Source chips (pill style) */
+    .src-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 12px; border-radius: 20px; font-size: 12.5px;
+      cursor: pointer; border: 1.5px solid; font-weight: 500;
+      transition: all .12s; font-family: inherit;
+    }
+    .src-pill.off { border-color:#E5E7EB; color:#6B7280; background:#F9FAFB; }
+    .src-pill.off:hover { border-color:#D1D5DB; background:#F3F4F6; }
+    .src-pill.c-blue   { background:#EFF6FF; border-color:#93C5FD; color:#2563EB; }
+    .src-pill.c-amber  { background:#FFFBEB; border-color:#FCD34D; color:#B45309; }
+    .src-pill.c-violet { background:#F5F3FF; border-color:#C4B5FD; color:#7C3AED; }
+    .src-pill.c-action { background:#F9FAFB; border-color:#D1D5DB; color:#374151; }
+    /* KB status cards */
+    .kb-card  { padding:11px 13px; border-radius:10px; border:1px solid; }
+    .kb-green  { background:#F0FDF4; border-color:#BBF7D0; }
+    .kb-yellow { background:#FEFCE8; border-color:#FDE68A; }
+    .kb-orange { background:#FFF7ED; border-color:#FED7AA; }
+    /* Comparison cards */
+    .cmp-before { background:#F8F9FA; border:1px solid #E8EBF0; border-radius:12px; padding:16px; }
+    .cmp-after  { background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:16px; }
+    .quote-hl {
+      display:inline; background:rgba(251,191,36,.18);
+      border-left:3px solid #F59E0B; padding:1px 6px 1px 7px;
+      border-radius:0 3px 3px 0; margin:0 2px;
+    }
+    /* 立即升华 button */
+    .btn-elevate {
+      background:linear-gradient(135deg,#FF8C00,#FF6100);
+      color:#fff; border:none; border-radius:10px;
+      padding:10px 22px; font-size:14px; font-weight:600;
+      cursor:pointer; transition:all .14s; font-family:inherit;
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .btn-elevate:hover { filter:brightness(1.07); box-shadow:0 4px 14px rgba(255,100,0,.3); }
+    .btn-elevate:disabled { opacity:.5; cursor:not-allowed; }
+    /* Feat btn active (elevate open) */
+    .feat-btn.e-active { border-color:var(--p)!important; background:var(--p-lt)!important; color:var(--p)!important; box-shadow:0 2px 8px rgba(0,160,223,.18)!important; }
+    /* Result diff area */
+    .edrop-result { background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:16px; }
+    /* ── Knowledge Hub page ── */
+    .kb-rec-card {
+      background:#fff; border:1px solid #EEF0F5; border-radius:14px;
+      padding:16px 14px; transition:all .15s; cursor:default;
+      box-shadow:0 1px 4px rgba(0,0,0,.04);
+    }
+    .kb-rec-card:hover { border-color:#C5E9F7; box-shadow:0 4px 16px rgba(0,160,223,.1); transform:translateY(-1px); }
+    .kb-join-btn {
+      font-size:12px; font-weight:600; padding:5px 14px; border-radius:7px;
+      border:1.5px solid var(--p); color:var(--p); background:transparent;
+      cursor:pointer; transition:all .12s; font-family:inherit;
+    }
+    .kb-join-btn:hover { background:var(--p); color:#fff; }
+    .kb-joined-btn {
+      font-size:12px; font-weight:600; padding:5px 14px; border-radius:7px;
+      border:1.5px solid #E5E7EB; color:#9CA3AF; background:#F9FAFB;
+      cursor:pointer; transition:all .12s; font-family:inherit;
+    }
+    .kb-joined-btn:hover { border-color:#FCA5A5; color:#EF4444; background:#FEF2F2; }
+    .kb-my-card {
+      display:flex; align-items:center; gap:10px;
+      background:#fff; border:1.5px solid #E8EBF0; border-radius:12px;
+      padding:11px 14px; transition:all .14s; cursor:pointer;
+      box-shadow:0 1px 4px rgba(0,0,0,.04);
+    }
+    .kb-my-card:hover { border-color:#C5E9F7; box-shadow:0 3px 12px rgba(0,160,223,.1); }
+    .kb-my-card.mine { border-color:#BAE6FD; background:linear-gradient(140deg,#F0FBFF,#E8F5FD); }
+    /* KB dropdown */
+    #kb-plus-drop {
+      position:absolute; left:0; bottom:calc(100% + 6px);
+      background:#fff; border:1px solid #E8EBF0; border-radius:12px;
+      box-shadow:0 8px 28px rgba(0,0,0,.12); padding:6px; min-width:160px;
+      z-index:50; animation:slideDown .15s ease;
+    }
+    .kb-drop-item {
+      display:flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:8px; font-size:13px; color:#374151;
+      cursor:pointer; border:none; background:none; font-family:inherit; width:100%;
+    }
+    .kb-drop-item:hover { background:#F3F4F6; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div id="toast">
+  <div class="flex items-center gap-2.5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl text-sm">
+    <span id="t-icon" class="flex-shrink-0"></span>
+    <span id="t-msg"></span>
+  </div>
+</div>
+
+<!-- ═══════════════ LAYOUT ═══════════════ -->
+<div class="flex min-h-screen">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="flex flex-col fixed h-full z-20"
+         style="width:196px;background:#FAFBFC;border-right:1px solid #EAECF0;">
+
+    <!-- ── Logo ── -->
+    <div class="flex items-center gap-2.5 px-5 py-5">
+      <div class="flex items-center justify-center rounded-xl flex-shrink-0"
+           style="width:30px;height:30px;background:linear-gradient(145deg,#00A0DF,#0073AF);box-shadow:0 2px 8px rgba(0,160,223,.35);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 11V3l2.5 3.5 2.5-2 2.5 2L12 3v8" stroke="#fff" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="flex flex-col leading-none">
+        <span style="font-size:14px;font-weight:700;color:#0F172A;letter-spacing:-.3px;">模力通</span>
+        <span style="font-size:9.5px;font-weight:500;color:#94A3B8;letter-spacing:.04em;margin-top:2px;">AI for easy work</span>
+      </div>
+    </div>
+
+    <!-- ── Main nav (flex-1) ── -->
+    <nav class="flex-1 overflow-y-auto px-2.5" style="padding-bottom:8px;">
+
+      <!-- Group label -->
+      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;color:#CBD5E1;padding:4px 10px 6px;text-transform:uppercase;">功能</div>
+
+      <button class="nav-item" id="nav-home" onclick="navigate('home')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="1.5" y="4.5" width="11" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M1.5 6.5L7 2l5.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M5 13V9.5h4V13" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        AI 智能体
+      </button>
+
+      <button class="nav-item" id="nav-writing" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="2" y="1.5" width="10" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 5h5M4.5 7.5h5M4.5 10h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 公文写作
+      </button>
+
+      <button class="nav-item" id="nav-review" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        AI 内容审校
+      </button>
+
+      <button class="nav-item" id="nav-proofread" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <path d="M2.5 10.5l2.5-2.5 2 2 4.5-4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1.5 3h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 公文校对
+      </button>
+
+      <button class="nav-item" id="nav-meeting" onclick="navigate('meeting')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 2.5V1.5M9.5 2.5V1.5M1.5 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 会议纪要
+      </button>
+
+      <button class="nav-item" id="nav-qa" onclick="navigate('knowledge')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <path d="M12 6.5A5 5 0 112 6.5c0 1.4.55 2.65 1.45 3.6L2 13h5l1.2-2.1A5 5 0 0012 6.5z"
+                stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M5.5 5a2 2 0 012.5-.4A1.6 1.6 0 019 6c0 1.1-1.5 1.6-1.5 2.5"
+                stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="7.5" cy="10" r=".55" fill="currentColor"/>
+        </svg>
+        AI 知识中枢
+      </button>
+
+    </nav>
+
+    <!-- ── History (bottom) ── -->
+    <div class="flex-shrink-0" style="border-top:1px solid #EEF0F4;">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-3.5 pt-3 pb-1.5">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.08em;color:#CBD5E1;text-transform:uppercase;">最近使用</span>
+        <button onclick="navigate('history')"
+                style="font-size:10.5px;color:#94A3B8;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;"
+                onmouseover="this.style.color='#00A0DF'" onmouseout="this.style.color='#94A3B8'">
+          全部 ›
+        </button>
+      </div>
+
+      <!-- History items -->
+      <div class="px-2" style="max-height:186px;overflow-y:auto;">
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;margin-top:1px;"></span>
+          <span class="truncate">关于加强基层治理工作…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;margin-top:1px;"></span>
+          <span class="truncate">2025年度工作总结升华</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">Q2季度汇报PPT排版</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">根据文档内容帮我生成…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#10B981;margin-top:1px;"></span>
+          <span class="truncate">关于新能源汽车的研究…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">每日咖啡因摄入影响报告</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">鱼油功效深度研究报告</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">智慧城市建设政策建议</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">员工绩效考核方案设计</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">招聘岗位说明书PPT</span>
+        </button>
+      </div>
+
+      <!-- View all -->
+      <div class="px-2.5 py-2.5">
+        <button onclick="navigate('history')"
+                class="w-full flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
+                style="font-size:11.5px;font-weight:500;color:#94A3B8;background:none;border:1px solid #EEF0F4;cursor:pointer;font-family:inherit;"
+                onmouseover="this.style.background='#F1F5F9';this.style.color='#475569'"
+                onmouseout="this.style.background='none';this.style.color='#94A3B8'">
+          查看全部历史记录
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M3.5 2.5L6.5 5l-3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ─── MAIN ─── -->
+  <main class="ml-[196px] flex-1 overflow-auto min-h-screen" style="background:#F5F7FA;">
+
+
+    <!-- ════════════════════════════════════
+         PAGE: HOME
+    ════════════════════════════════════ -->
+    <div id="page-home" class="page">
+      <!-- Top right action bar -->
+      <div class="flex items-center justify-end gap-3 px-8 py-3.5">
+        <button class="btn-g p-2" title="我的文档" onclick="showToast('info','文档功能即将上线')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M4 2h7l4 4v10H4V2z" stroke="#6B7280" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M11 2v5h4M6.5 10h5M6.5 12.5h3" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="btn-g p-2" title="资源库" onclick="showToast('info','资源库功能即将上线')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="4" width="14" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.4"/>
+            <rect x="2" y="10" width="14" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.4"/>
+            <circle cx="4.5" cy="6" r=".9" fill="#6B7280"/>
+            <circle cx="4.5" cy="12" r=".9" fill="#6B7280"/>
+          </svg>
+        </button>
+        <button class="relative p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition-all"
+                onclick="showToast('info','AI 模型选择功能即将上线')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2L11.5 7 17 8l-4 3.5 1 5.5-5-2.5L4 17l1-5.5L1 8l5.5-1z" stroke="#6B7280" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+          <span class="absolute -top-1 -right-1 text-white rounded px-1"
+                style="font-size:8px;font-weight:700;background:#1677FF;line-height:14px;">NEW</span>
+        </button>
+        <button class="btn-g p-2" title="更多应用" onclick="showToast('info','更多应用即将上线')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+            <rect x="10" y="2" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+            <rect x="2" y="10" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+            <rect x="10" y="10" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+          </svg>
+        </button>
+        <div class="flex items-center gap-2 pl-2 border-l border-gray-200">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+               style="background:linear-gradient(135deg,#00A0DF,#0082B8);">1</div>
+          <div class="rounded px-2 py-0.5 text-xs font-semibold text-white cursor-pointer"
+               style="background:linear-gradient(90deg,#00A0DF,#0082B8);">尊享版X</div>
+        </div>
+      </div>
+
+      <!-- Main centered content -->
+      <div class="flex flex-col items-center px-6 pb-12" style="padding-top:3vh;">
+
+        <!-- Title -->
+        <h1 class="font-bold text-center tracking-tight mb-7"
+            style="font-size:32px;color:#1A1A2E;line-height:1.2;letter-spacing:-.5px;">
+          一句话交代&nbsp;<span style="font-size:30px;">💬</span>&nbsp;一整套交付
+        </h1>
+
+        <!-- Input box -->
+        <div class="w-full rounded-2xl overflow-hidden shadow-sm" style="max-width:740px;background:#fff;border:1px solid #E4E7ED;">
+          <textarea rows="3" id="home-input"
+            placeholder="请输入内容开始写作"
+            class="w-full px-5 py-4 text-gray-800"
+            style="border:none;box-shadow:none;border-radius:0;font-size:15px;line-height:1.7;resize:none;outline:none;"></textarea>
+          <!-- Toolbar -->
+          <div class="flex items-center justify-between px-4 py-2.5 border-t" style="border-color:#F0F2F5;">
+            <div class="flex items-center gap-1">
+              <button class="btn-g text-gray-400 text-xs font-medium px-2 py-1.5 rounded-lg"
+                      onclick="showToast('info','附件功能即将上线')">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M12 5.5L6 12a3.5 3.5 0 01-4.95-4.95l5-5a2.5 2.5 0 013.54 3.54L4.54 11.1A1.5 1.5 0 012.4 8.96l5-5"
+                        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                +
+              </button>
+              <button class="btn-g text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                      style="color:#374151;background:#F5F7FA;border:1px solid #E8EBF0;"
+                      onclick="showToast('info','快速模式即将上线')">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M7 1L3 7h4L5 11l6-7H7z" fill="#F59E0B" stroke="#F59E0B" stroke-width=".5" stroke-linejoin="round"/>
+                </svg>
+                快速模式
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M3 4l2 2 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="btn-g text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                      style="color:#374151;background:#F5F7FA;border:1px solid #E8EBF0;"
+                      onclick="showToast('info','文风助手库即将上线')">
+                文风助手库
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M3 4l2 2 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <button class="w-8 h-8 rounded-lg flex items-center justify-center text-white transition-all"
+                    style="background:var(--p);"
+                    onclick="showToast('info','请先输入内容')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 13V3M4 7l4-4 4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Feature row (横向滚动，鼠标悬停左右边缘自动滚动) ── -->
+        <div class="feat-row-wrap mt-4 w-full" style="max-width:740px;">
+          <!-- Left scroll zone -->
+          <div id="feat-sl" class="feat-scroll-zone feat-sl hide"
+               onmouseenter="startFeatScroll(-1)" onmouseleave="stopFeatScroll()">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M11 5l-4 4 4 4" stroke="#374151" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div class="feat-row" id="feat-row" onscroll="updateFeatScroll()">
+
+            <!-- 1. 写作 -->
+            <button class="feat-btn" onclick="navigate('writing')">
+              <span class="feat-icon" style="background:#F0FDF4;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M8 1.5L12 5.5 5.5 12H2.5V9L9 2.5" stroke="#16A34A" stroke-width="1.3" stroke-linejoin="round"/>
+                  <path d="M7 3L10.5 6.5" stroke="#16A34A" stroke-width="1.3"/>
+                </svg>
+              </span>
+              写作
+            </button>
+
+            <!-- 2. 润色 -->
+            <button class="feat-btn feat-new" onclick="navigate('polish')">
+              <span class="feat-icon" style="background:#E0F4FB;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 6c0 1.4.6 2.7 1.6 3.6L1.5 12.5H6L7 10.6A4.5 4.5 0 107 1.5z"
+                        stroke="#00A0DF" stroke-width="1.3" stroke-linejoin="round"/>
+                  <path d="M5.5 6h3M7 4.5v3" stroke="#00A0DF" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </span>
+              润色
+            </button>
+
+            <!-- 3. 升华 (dropdown toggle) -->
+            <button class="feat-btn feat-new" id="elevate-toggle-btn" onclick="toggleElevatePanel()">
+              <span class="feat-icon" style="background:#E0F4FB;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6l4.2-1z"
+                        stroke="#00A0DF" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              升华
+            </button>
+
+            <!-- 4. 校对 -->
+            <button class="feat-btn feat-new" onclick="navigate('writing')">
+              <span class="feat-icon" style="background:#F5F3FF;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2.5 4h6M2.5 7h5M2.5 10h3.5" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M10 6l1.5 1.5 2.5-3" stroke="#7C3AED" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              校对
+            </button>
+
+            <!-- 5. 排版 -->
+            <button class="feat-btn feat-new" onclick="navigate('layout')">
+              <span class="feat-icon" style="background:#E0F4FB;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="1" y="1" width="5" height="6.5" rx="1" stroke="#00A0DF" stroke-width="1.3"/>
+                  <rect x="8" y="1" width="5" height="3.5" rx="1" stroke="#00A0DF" stroke-width="1.3"/>
+                  <rect x="1" y="9.5" width="12" height="3.5" rx="1" stroke="#00A0DF" stroke-width="1.3"/>
+                  <rect x="8" y="6.5" width="5" height="1.5" rx=".5" stroke="#00A0DF" stroke-width="1.3"/>
+                </svg>
+              </span>
+              排版
+            </button>
+
+            <!-- 6. AI PPT -->
+            <button class="feat-btn" onclick="navigate('ppt')">
+              <span class="feat-icon" style="background:#FFF1F2;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="1" y="2" width="12" height="8" rx="1.2" stroke="#E11D48" stroke-width="1.3"/>
+                  <path d="M5 12.5l2-2.5 2 2.5M4.5 12.5h5" stroke="#E11D48" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              AI PPT
+            </button>
+
+            <!-- 7. 深度研究 -->
+            <button class="feat-btn" onclick="navigate('research')">
+              <span class="feat-icon" style="background:#FFF7ED;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="5.5" cy="5.5" r="3.5" stroke="#EA580C" stroke-width="1.3"/>
+                  <path d="M8.5 8.5l3.5 3.5" stroke="#EA580C" stroke-width="1.3" stroke-linecap="round"/>
+                  <path d="M3.5 5.5h4M5.5 3.5v4" stroke="#EA580C" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </span>
+              深度研究
+            </button>
+
+            <!-- 8. 会议纪要 -->
+            <button class="feat-btn" onclick="navigate('meeting')">
+              <span class="feat-icon" style="background:#EFF6FF;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="1.5" y="2.5" width="11" height="9" rx="1.2" stroke="#2563EB" stroke-width="1.3"/>
+                  <path d="M4.5 2.5V1.5M9.5 2.5V1.5M1.5 6h11" stroke="#2563EB" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </span>
+              会议纪要
+            </button>
+
+          </div><!-- /feat-row -->
+
+          <!-- Right scroll zone -->
+          <div id="feat-sr" class="feat-scroll-zone feat-sr"
+               onmouseenter="startFeatScroll(1)" onmouseleave="stopFeatScroll()">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M7 5l4 4-4 4" stroke="#374151" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div><!-- /feat-row-wrap -->
+
+        <!-- ── ELEVATE DROPDOWN PANEL ── -->
+        <div id="elevate-drop" class="w-full hidden" style="max-width:740px;">
+          <div class="elevate-panel">
+
+            <!-- Header -->
+            <div class="px-6 pt-5 pb-4 flex items-start gap-3 border-b" style="border-color:#F0F2F5;">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
+                   style="background:linear-gradient(135deg,#FEF3C7,#FCD34D);">⭐</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-base font-bold" style="color:#1A1A2E;letter-spacing:-.2px;">AI 升华引用</span>
+                  <span class="text-white text-xs font-bold px-2 py-0.5 rounded"
+                        style="background:#4F7CF8;font-size:11px;">新功能</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                  将文章观点与经典典籍、党政文献智能关联，提升思想深度
+                </p>
+              </div>
+              <button onclick="toggleElevatePanel()"
+                      class="btn-g w-8 h-8 p-0 flex items-center justify-center rounded-lg flex-shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Two-column body -->
+            <div class="px-6 py-5" style="display:grid;grid-template-columns:1fr 256px;gap:20px;">
+
+              <!-- Left: Source selection -->
+              <div class="flex flex-col gap-4">
+                <!-- Content source hint -->
+                <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl" style="background:#F5F7FA;border:1px solid #E8EBF0;">
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" class="flex-shrink-0 text-gray-400">
+                    <rect x="1.5" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                    <path d="M4.5 5.5h6M4.5 8h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                  </svg>
+                  <span class="text-xs text-gray-500">将对<span class="font-medium text-gray-700">对话框中的内容</span>进行升华引用</span>
+                </div>
+
+                <!-- Source chips -->
+                <div>
+                  <div class="text-xs font-semibold text-gray-600 mb-2.5">选择引用来源
+                    <span class="font-normal text-gray-400 ml-1">（至少选一项）</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button class="src-pill c-blue" id="ep-lx" onclick="togglePill(this,'c-blue','学习专栏')">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      学习专栏
+                    </button>
+                    <button class="src-pill c-amber" id="ep-rj" onclick="togglePill(this,'c-amber','儒家经典')">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      儒家经典
+                    </button>
+                    <button class="src-pill off" id="ep-jd" onclick="togglePill(this,'c-violet','经典思想')">经典思想</button>
+                    <button class="src-pill c-action" onclick="showToast('info','知识库选择即将上线')">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        <rect x="1" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <rect x="6" y="1" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <rect x="1" y="6" width="4" height="4" rx=".8" stroke="currentColor" stroke-width="1.2"/>
+                        <path d="M8 6.5v4M6 8.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      </svg>
+                      选择知识库
+                    </button>
+                    <button class="src-pill c-action" onclick="document.getElementById('edrop-file').click()">
+                      <input type="file" id="edrop-file" class="hidden" onchange="showToast('success','文件已上传，正在建立知识库')">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        <path d="M5.5 1v7M3 4l2.5-3L8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1.5 9v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                      </svg>
+                      上传文件
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Elevate action -->
+                <div class="flex items-center justify-end pt-2">
+                  <button class="btn-elevate" id="edrop-btn" onclick="runElevateDrop()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z"
+                            stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+                    </svg>
+                    立即升华
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: KB status -->
+              <div>
+                <div class="text-sm font-semibold mb-3" style="color:#1A1A2E;">知识库状态</div>
+                <div class="space-y-2.5">
+                  <div class="kb-card kb-green">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold" style="color:#15803D;">儒家经典</span>
+                      <span class="text-xs font-semibold" style="color:#16A34A;">已就绪</span>
+                    </div>
+                    <p class="text-xs text-gray-500">论语・孟子・道德经・大学・中庸</p>
+                  </div>
+                  <div class="kb-card kb-yellow">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold text-gray-800">学习专栏</span>
+                      <span class="text-xs font-semibold text-amber-600">部分就绪</span>
+                    </div>
+                    <p class="text-xs text-gray-500">重要讲话・历届会议文件</p>
+                  </div>
+                  <div class="kb-card kb-orange">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-sm font-semibold text-gray-800">经典思想</span>
+                      <span class="flex items-center gap-1 text-xs font-semibold text-orange-500">
+                        <span class="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block"></span>准备中
+                      </span>
+                    </div>
+                    <p class="text-xs text-gray-500">数据同步进行中，预计下期上线</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Processing state (hidden) -->
+            <div id="edrop-processing" class="hidden px-6 pb-5">
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl" style="background:#F0FBFF;border:1px solid #BAE6FD;">
+                <div class="w-5 h-5 rounded-full border-2 spin flex-shrink-0" style="border-color:#00A0DF;border-top-color:transparent;"></div>
+                <span class="text-sm font-medium" style="color:#0082B8;" id="edrop-proc-txt">正在检索经典语录，智能匹配语义相关引文…</span>
+              </div>
+            </div>
+
+            <!-- Result (hidden) -->
+            <div id="edrop-result" class="hidden px-6 pb-6">
+              <div class="border-t pt-5 mb-5" style="border-color:#F0F2F5;">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-sm font-semibold" style="color:#1A1A2E;">升华结果</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#DCFCE7;color:#15803D;">完成</span>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">AI 已完成改写，高亮部分为嵌入的经典引文</p>
+                <div class="edrop-result prose" id="edrop-result-content"></div>
+                <!-- Source citations -->
+                <div class="mt-4 space-y-2" id="edrop-sources"></div>
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-2 mt-4">
+                  <button class="btn-g text-sm" onclick="showToast('info','下载功能即将上线')">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                      <path d="M6.5 1v8M3.5 6l3 3 3-3M1.5 10v1.5a.7.7 0 00.7.7h8.6a.7.7 0 00.7-.7V10"
+                            stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    下载
+                  </button>
+                  <button class="btn-g text-sm" onclick="navigate('elevate');setTimeout(()=>document.getElementById('elevate-input').value=document.getElementById('home-input').value,100)">
+                    进入完整编辑器
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M4.5 2.5l4 3.5-4 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Example comparison (always visible) ── -->
+            <div class="px-6 pb-6 border-t" style="border-color:#F0F2F5;" id="edrop-example">
+              <div class="flex items-center justify-between pt-5 mb-3">
+                <span class="text-sm font-semibold" style="color:#1A1A2E;">示例效果</span>
+                <span class="text-xs text-gray-400">升华前 → 升华后</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="cmp-before">
+                  <div class="text-xs font-medium text-gray-400 mb-2.5">原文</div>
+                  <p class="text-sm text-gray-700 leading-relaxed">
+                    我办公室在项目推进过程中，始终坚持规范管理、有序推进，确保各项工作既合规又高效。
+                  </p>
+                </div>
+                <div class="cmp-after">
+                  <div class="text-xs font-semibold mb-2.5" style="color:#D97706;">升华后</div>
+                  <p class="text-sm leading-relaxed text-gray-800">
+                    我办公室在项目推进过程中，始终坚持规范管理、有序推进，<span class="quote-hl">《论语·子路》有云："名不正则言不顺，言不顺则事不成"</span>，确保各项工作既合规又高效。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Expert section ── -->
+        <div class="w-full mt-10" style="max-width:740px;">
+          <h2 class="text-sm font-semibold text-center mb-4" style="color:#1A1A2E;">
+            写作专家团队，为您精修每一篇文章
+          </h2>
+          <div class="grid grid-cols-3 gap-3">
+            <!-- Card template -->
+            <div class="expert-card" onclick="showToast('info','写作达人正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#DBEAFE,#93C5FD);">✍️</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">写作达人</div>
+                  <div class="text-xs text-gray-400">写作专家、内容生成专家</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">大纲写作</span>
+                <span class="expert-tag">极速写作</span>
+                <span class="expert-tag">公文写作</span>
+              </div>
+            </div>
+
+            <div class="expert-card" onclick="showToast('info','统筹专家正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#FEF3C7,#FCD34D);">📋</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">统筹专家</div>
+                  <div class="text-xs text-gray-400">任务管理专家</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">需求拆解</span>
+                <span class="expert-tag">任务规划</span>
+              </div>
+            </div>
+
+            <div class="expert-card" onclick="showToast('info','检索专家正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#D1FAE5,#6EE7B7);">🔍</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">检索专家</div>
+                  <div class="text-xs text-gray-400">精准信息收集专家</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">信息收集</span>
+                <span class="expert-tag">自动判别</span>
+              </div>
+            </div>
+
+            <div class="expert-card" onclick="showToast('info','文献阅读师正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#EDE9FE,#C4B5FD);">📚</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">文献阅读师</div>
+                  <div class="text-xs text-gray-400">专业文献处理与知识提取助手</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">信息收集</span>
+                <span class="expert-tag">自动判别</span>
+              </div>
+            </div>
+
+            <div class="expert-card" onclick="showToast('info','研究员正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#FEE2E2,#FCA5A5);">🔬</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">研究员</div>
+                  <div class="text-xs text-gray-400">深度研究专家</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">深度研究</span>
+                <span class="expert-tag">数据分析</span>
+                <span class="expert-tag">图表生成</span>
+              </div>
+            </div>
+
+            <div class="expert-card" onclick="showToast('info','资深编辑正在为您服务')">
+              <div class="flex items-center gap-2.5 mb-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0"
+                     style="background:linear-gradient(135deg,#E0F2FE,#7DD3FC);">✏️</div>
+                <div>
+                  <div class="text-sm font-semibold" style="color:#1A1A2E;">资深编辑</div>
+                  <div class="text-xs text-gray-400">内容校对与风险把控专家</div>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="expert-tag">文字校对</span>
+                <span class="expert-tag">标点校对</span>
+                <span class="expert-tag">知识校对</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         PAGE: POLISH 润色
+    ════════════════════════════════════ -->
+    <div id="page-polish" class="page">
+      <!-- ── Top step navigation ── -->
+      <div class="flex-shrink-0 bg-white border-b flex items-center justify-between px-5" style="height:44px;border-color:#EBEDF0;">
+        <div class="pe-step">
+          <span class="pe-step-item done">选择场景</span>
+          <span class="pe-step-sep">→</span>
+          <span class="pe-step-item done">信息输入</span>
+          <span class="pe-step-sep">→</span>
+          <span class="pe-step-item done">公文生成</span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item active flex items-center gap-1">
+            <span style="font-size:13px;">Aα</span> 内容润色
+          </span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item flex items-center gap-1">
+            <span style="font-size:13px;font-weight:700;">中</span> 内容校对
+          </span>
+          <span class="pe-step-sep" style="margin:0 14px;letter-spacing:2px;">····</span>
+          <span class="pe-step-item flex items-center gap-1">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="4" height="5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="5" height="2.5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8" width="11" height="2.5" rx=".8" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="5" width="5" height="1.5" rx=".4" stroke="currentColor" stroke-width="1.2"/></svg>
+            一键排版
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn-g text-xs" onclick="navigate('home')">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M8.5 3L4.5 6.5l4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            返回
+          </button>
+          <button class="text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer"
+                  style="background:var(--p);border:none;font-family:inherit;">权益详情</button>
+        </div>
+      </div>
+
+      <!-- ── Editor body (left sidebar + editor + right panel) ── -->
+      <div class="flex flex-1 overflow-hidden" style="height:calc(100vh - 44px);">
+
+        <!-- Left tool sidebar -->
+        <div class="flex-shrink-0 bg-white border-r flex flex-col items-center pt-3 gap-1" style="width:66px;border-color:#EBEDF0;">
+          <button class="pe-tool-btn active" onclick="polishTool('polish')">
+            <span class="pe-tool-icon" style="color:var(--p);">Aα</span>
+            <span class="pe-tool-label" style="color:var(--p);">内容润色</span>
+          </button>
+          <button class="pe-tool-btn" onclick="polishTool('proofread')">
+            <span class="pe-tool-icon text-gray-500" style="font-size:16px;font-weight:800;">中</span>
+            <span class="pe-tool-label text-gray-500">内容校对</span>
+          </button>
+          <button class="pe-tool-btn" onclick="navigate('layout')">
+            <span class="pe-tool-icon flex items-center justify-center" style="height:20px;">
+              <svg width="18" height="16" viewBox="0 0 18 16" fill="none">
+                <rect x="1" y="1" width="6" height="7.5" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="10" y="1" width="7" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="1" y="11" width="16" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.3"/>
+                <rect x="10" y="7" width="7" height="2" rx=".6" stroke="#6B7280" stroke-width="1.3"/>
+              </svg>
+            </span>
+            <span class="pe-tool-label text-gray-500">一键排版</span>
+          </button>
+          <button class="pe-tool-btn" onclick="showToast('info','公文素材功能即将上线')">
+            <span class="pe-tool-icon flex items-center justify-center" style="height:20px;">
+              <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                <path d="M3 1h7l4 4v12H3V1z" stroke="#6B7280" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M10 1v5h4M5 9h6M5 12h4" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="pe-tool-label text-gray-500">公文素材</span>
+          </button>
+        </div>
+
+        <!-- Editor main area -->
+        <div class="flex-1 overflow-auto" style="background:#F0F2F5;">
+          <!-- Toolbar -->
+          <div class="flex-shrink-0 bg-white border-b flex items-center flex-wrap gap-0.5 px-3 py-1.5" style="border-color:#EBEDF0;">
+            <button class="pe-toolbar-btn" title="撤销">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 6V3l-1.5 3H2zm-1.5 0C1.1 3.5 3.5 2 6 2a5 5 0 110 10 5 5 0 01-4-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="pe-toolbar-btn" title="重做">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 6V3l1.5 3H12zm1.5 0C12.9 3.5 10.5 2 8 2a5 5 0 100 10 5 5 0 004-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="pe-toolbar-btn" title="清除格式">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 2h8l-3 5v4l-2-1V7L3 2zM1 12h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn font-medium px-2">正文 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn font-bold text-sm">B</button>
+            <button class="pe-toolbar-btn underline text-sm">U</button>
+            <button class="pe-toolbar-btn italic text-sm">I</button>
+            <button class="pe-toolbar-btn text-sm">A<span style="color:#E11D48;font-size:8px;">▼</span></button>
+            <button class="pe-toolbar-btn text-sm">A<span style="background:#E11D48;color:white;font-size:8px;padding:0 1px;">▼</span></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn px-2">三号 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn px-2">黑体 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn px-2">1 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" class="inline"><path d="M2 3l2 2 2-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <div class="pe-toolbar-sep"></div>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 3h11M1 6.5h8M1 10h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3h9M1 6.5h11M2 10h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 3h7M1 6.5h11M4 10h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 3h10M3.5 6.5h7M1.5 10h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+            <button class="pe-toolbar-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2.5h9M2 5h7M2 7.5h9M2 10h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/><path d="M10 8l2 2-2 2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+
+          <!-- Document page -->
+          <div class="doc-page" id="polish-doc">
+            <!-- Watermarks -->
+            <div class="doc-watermark" style="top:120px;left:60px;">281443</div>
+            <div class="doc-watermark" style="top:340px;left:80px;font-size:13px;">2025-06-03 16:18</div>
+            <div class="doc-watermark" style="top:580px;left:50px;">281443</div>
+            <div class="doc-watermark" style="top:800px;left:70px;font-size:13px;">2025-06-03 16:18</div>
+
+            <!-- Document content -->
+            <h1 class="text-center font-bold mb-8" style="font-size:22px;font-family:'方正小标宋','SimHei',sans-serif;letter-spacing:1px;">
+              关于颁发本年度科学技术奖励的决定
+            </h1>
+            <p class="mb-4" style="text-indent:2em;">各省、自治区、直辖市人民政府，国务院各部委、各直属机构：</p>
+            <p class="mb-4" style="text-indent:2em;">
+              中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。为深入贯彻习近平新时代中国特色社会主义思想和党的二十大精神，深入实施科教兴国战略、人才强国战略、创新驱动发展战略，中共中央、国务院决定，对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的科学技术人员和组织给予奖励。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              根据《国家功勋荣誉表彰条例》、《国家科学技术奖励条例》的规定，经国家科学技术奖励评审委员会评审、国家科学技术奖励委员会审定和科技部审核，党中央、国务院批准并报请国家主席习近平签署，授予李德仁院士、薛其坤院士国家最高科学技术奖。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              本年度国家自然科学奖授奖项目49项，其中一等奖3项、二等奖46项；国家技术发明奖授奖项目62项，其中特等奖1项、一等奖8项、二等奖53项；国家科学技术进步奖授奖项目139项，其中特等奖2项、一等奖16项、二等奖121项；授予10名外籍专家中华人民共和国国际科学技术合作奖。
+            </p>
+            <p class="mb-4" style="text-indent:2em;">
+              希望受到奖励的科学技术人员和组织，继续发扬科学精神，勇攀科技高峰，在建设科技强国、实现高水平科技自立自强上作出新的更大贡献。
+            </p>
+            <p class="mb-6" style="text-indent:2em;">
+              各地区各部门要认真贯彻落实党中央、国务院关于科技创新的重大决策部署，大力培育和弘扬科学家精神，优化科技创新生态，激发创新创造活力，加快实现高水平科技自立自强，为以中国式现代化全面推进强国建设、民族复兴伟业提供有力支撑。
+            </p>
+            <p class="text-right mb-2">中共中央&emsp;国务院</p>
+            <p class="text-right">二〇二四年六月二十四日</p>
+
+            <!-- Result area (hidden until polish runs) -->
+            <div id="polish-doc-result" class="hidden mt-8 pt-6 border-t" style="border-color:#FDE68A;">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm font-semibold text-gray-800">润色结果</span>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#DCFCE7;color:#15803D;">完成</span>
+                <span class="text-xs text-gray-400 ml-2">已标注修改位置</span>
+              </div>
+              <div id="polish-doc-result-content" class="prose leading-loose" style="font-size:15px;line-height:2.2;"></div>
+            </div>
+          </div>
+        </div><!-- /editor main -->
+
+        <!-- Right panel -->
+        <div class="flex-shrink-0 bg-white border-l flex flex-col" style="width:284px;border-color:#EBEDF0;">
+          <!-- Panel header -->
+          <div class="flex items-center justify-between px-4 py-3.5 border-b flex-shrink-0" style="border-color:#EBEDF0;">
+            <span class="font-semibold text-gray-900" style="font-size:14px;">内容润色</span>
+            <button class="btn-g w-7 h-7 p-0 flex items-center justify-center rounded-lg" onclick="navigate('home')">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Function tabs -->
+          <div class="flex border-b flex-shrink-0 px-2" style="border-color:#EBEDF0;">
+            <button class="rp-tab on" id="rpt-polish" onclick="rpTab('polish')">润色</button>
+            <button class="rp-tab" id="rpt-rewrite" onclick="rpTab('rewrite')">改写</button>
+            <button class="rp-tab" id="rpt-expand" onclick="rpTab('expand')">扩写</button>
+            <button class="rp-tab" id="rpt-continue" onclick="rpTab('continue')">续写</button>
+            <button class="rp-tab" id="rpt-shorten" onclick="rpTab('shorten')">缩写</button>
+          </div>
+
+          <!-- Panel body (scrollable) -->
+          <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+
+            <!-- 润色内容 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">润色内容</div>
+              <div class="relative">
+                <textarea id="rp-content" rows="5"
+                  placeholder="请输入需要润色的内容"
+                  oninput="document.getElementById('rp-cc').textContent=this.value.length+'/2500'"
+                  maxlength="2500"
+                  style="height:110px;font-size:13px;line-height:1.7;border-color:#E4E7ED;border-radius:8px;resize:none;padding-bottom:20px;"></textarea>
+                <span class="absolute bottom-2 right-3 text-xs text-gray-400" id="rp-cc">0/2500</span>
+              </div>
+            </div>
+
+            <!-- 优化方向 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                优化方向
+                <span class="font-normal text-gray-400 ml-1">（多选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" onclick="toggleChip(this)">通顺表达</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增强感情</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增强说服力</button>
+                <button class="rp-chip" onclick="toggleChip(this)">提升文采</button>
+                <button class="rp-chip" onclick="toggleChip(this)">增加细节</button>
+                <button class="rp-chip custom" onclick="showToast('info','自定义输入即将支持')">自定义输入</button>
+              </div>
+            </div>
+
+            <!-- 语言风格 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                语言风格
+                <span class="font-normal text-gray-400 ml-1">（多选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" onclick="toggleChip(this)">正式</button>
+                <button class="rp-chip" onclick="toggleChip(this)">通俗</button>
+                <button class="rp-chip" onclick="toggleChip(this)">幽默</button>
+                <button class="rp-chip" onclick="toggleChip(this)">专业</button>
+                <button class="rp-chip" onclick="toggleChip(this)">亲切</button>
+                <button class="rp-chip custom" onclick="showToast('info','自定义输入即将支持')">自定义输入</button>
+              </div>
+            </div>
+
+            <!-- 长度要求 -->
+            <div>
+              <div class="text-xs font-semibold text-gray-700 mb-2">
+                长度要求
+                <span class="font-normal text-gray-400 ml-1">（单选）</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button class="rp-chip on" id="len-keep" onclick="pickLength(this)">保持</button>
+                <button class="rp-chip" id="len-short" onclick="pickLength(this)">精简</button>
+                <button class="rp-chip" id="len-long" onclick="pickLength(this)">扩写</button>
+              </div>
+            </div>
+
+            <!-- Processing state -->
+            <div id="rp-processing" class="hidden">
+              <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl" style="background:#F0FBFF;border:1px solid #BAE6FD;">
+                <div class="w-4 h-4 rounded-full border-2 spin flex-shrink-0" style="border-color:var(--p);border-top-color:transparent;"></div>
+                <span class="text-xs font-medium" style="color:#0082B8;" id="rp-proc-txt">AI 正在润色中…</span>
+              </div>
+            </div>
+
+          </div><!-- /panel body -->
+
+          <!-- Bottom action -->
+          <div class="flex-shrink-0 border-t p-4" style="border-color:#EBEDF0;">
+            <button class="w-full btn-p justify-center py-2.5 text-sm font-semibold" id="rp-run-btn" onclick="runPolishEditor()">
+              开始润色
+            </button>
+          </div>
+        </div><!-- /right panel -->
+
+      </div><!-- /editor body -->
+    </div><!-- /page-polish -->
+
+
+    <!-- ════════════════════════════════════
+         PAGE: ELEVATE 升华
+    ════════════════════════════════════ -->
+    <div id="page-elevate" class="page">
+      <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center gap-3 z-10">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--p-lt);">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1l2 5 5.5 1-4 3.75 1 5.25-4.5-2.5-4.5 2.5 1-5.25L.5 7z"
+                  stroke="#00A0DF" stroke-width="1.4" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold tracking-tight text-gray-900">升华</h1>
+          <p class="text-xs text-gray-500">经典理论关联 · 提升思想高度 · 增强论证力度</p>
+        </div>
+        <!-- Steps -->
+        <div class="ml-auto flex items-center gap-1">
+          <div class="s-dot on" id="e-s1">1</div>
+          <div class="s-line" id="e-l1"></div>
+          <div class="s-dot" id="e-s2">2</div>
+          <div class="s-line" id="e-l2"></div>
+          <div class="s-dot" id="e-s3">3</div>
+          <div class="ml-3 text-xs text-gray-400" id="e-step-label">输入与来源</div>
+        </div>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-8 py-8">
+
+        <!-- Panel 1: Input + Sources -->
+        <div id="ep1">
+          <div class="grid grid-cols-5 gap-6">
+            <!-- Text -->
+            <div class="col-span-3">
+              <label class="block text-sm font-medium text-gray-700 mb-2">输入待升华文章</label>
+              <textarea id="elevate-input" rows="18"
+                placeholder="请粘贴或输入需要升华的文章内容…"
+                style="height:440px;line-height:1.85;">2025年度工作总结报告
+
+今年以来，我单位认真贯彻落实上级部署要求，以高质量发展为主线，扎实推进各项工作，取得了一定成效。
+
+一、主要工作完成情况
+
+在经济发展方面，全年完成产值同比增长12%，主要指标均达到年初预定目标。在队伍建设方面，开展了系列培训活动，干部队伍整体素质得到提升。在民生保障方面，持续加大投入，群众满意度明显提高。
+
+二、存在的问题
+
+工作中也存在一些问题，主要是创新能力不足，工作方法比较单一，还需要进一步提升。
+
+三、下一步打算
+
+坚持问题导向，有针对性地补短板强弱项，推动各项工作再上新台阶，为实现高质量发展目标而不懈努力。</textarea>
+            </div>
+
+            <!-- Sources -->
+            <div class="col-span-2 flex flex-col gap-3">
+              <div class="text-sm font-medium text-gray-700">选择升华来源
+                <span class="text-xs font-normal text-gray-400 ml-1">至少选一项</span>
+              </div>
+
+              <div class="src-card on" id="sc-learning" onclick="toggleSrc(this,'learning')">
+                <div class="flex items-start gap-3">
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#FEF3C7;">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <path d="M9 2L3 5v5c0 3.3 2.7 6 6 6s6-2.7 6-6V5z" stroke="#D97706" stroke-width="1.4" stroke-linejoin="round"/>
+                      <path d="M6.5 9l2 2 3-3" stroke="#D97706" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-900">学习专栏</span>
+                      <div class="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
+                           id="sc-chk-learning" style="background:var(--p);border:1.5px solid var(--p);">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                          <path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">国家领导人讲话、重要论述、政策解读</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="src-card on" id="sc-quote" onclick="toggleSrc(this,'quote')">
+                <div class="flex items-start gap-3">
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#EDE9FE;">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <path d="M3.5 10V7a4 4 0 014-4" stroke="#7C3AED" stroke-width="1.4" stroke-linecap="round"/>
+                      <circle cx="3.5" cy="11.5" r="2" stroke="#7C3AED" stroke-width="1.4"/>
+                      <path d="M10.5 10V7a4 4 0 014-4" stroke="#7C3AED" stroke-width="1.4" stroke-linecap="round"/>
+                      <circle cx="10.5" cy="11.5" r="2" stroke="#7C3AED" stroke-width="1.4"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-900">金句用典</span>
+                      <div class="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
+                           id="sc-chk-quote" style="background:var(--p);border:1.5px solid var(--p);">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                          <path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">名言警句、成语典故、历史故事</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="src-card cursor-pointer" id="sc-classic" onclick="showToast('info','先贤经典功能灰度测试中，敬请期待')">
+                <div class="flex items-start gap-3">
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#F0FDF4;">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <path d="M9 2l7 3v5a7 7 0 01-7 6 7 7 0 01-7-6V5z" stroke="#10B981" stroke-width="1.4" stroke-linejoin="round"/>
+                      <path d="M6 9h6M9 6v6" stroke="#10B981" stroke-width="1.4" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-900">先贤经典</span>
+                      <span class="badge badge-soon">敬请期待</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 leading-relaxed">诸子百家、四书五经等传统文化经典</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div class="rounded-xl p-3.5 mt-auto" style="background:#F8F9FA;border:1px solid #ECEEF1;">
+                <div class="flex items-start gap-2">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="mt-0.5 flex-shrink-0">
+                    <circle cx="6.5" cy="6.5" r="5" stroke="#9CA3AF" stroke-width="1.2"/>
+                    <path d="M6.5 6v3M6.5 4.5v.5" stroke="#9CA3AF" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  <p class="text-xs text-gray-500 leading-relaxed">升华会基于所选来源改写文章，结果中将标注引用位置，请核对准确性后再使用。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <div class="text-xs text-gray-400">已选：学习专栏、金句用典</div>
+            <div class="flex gap-3">
+              <button class="btn-s" onclick="navigate('home')">取消</button>
+              <button class="btn-p" onclick="runElevate()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 1l1.8 4.5L13 6l-3.25 3.25.75 4.75-3.5-2-3.5 2 .75-4.75L1 6z"
+                        stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+                开始升华
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Processing -->
+        <div id="ep2" class="hidden">
+          <div class="flex flex-col items-center justify-center py-20">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" style="background:var(--p-lt);">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path d="M16 3l3 8L27 12l-6 5.5 1.5 9.5L16 22l-6.5 5 1.5-9.5L5 12l8-1z"
+                      stroke="#00A0DF" stroke-width="1.8" stroke-linejoin="round" class="spin" style="transform-origin:50% 50%;"/>
+              </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">AI 正在升华中…</h2>
+            <p class="text-sm text-gray-500 mb-8">分析主题观点，检索经典素材，生成整篇改写</p>
+            <!-- Progress steps -->
+            <div class="w-96 space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white"
+                     style="background:#10B981;font-size:9px;">✓</div>
+                <div class="flex-1">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-medium text-gray-700">分析文章主题与核心观点</span>
+                    <span style="color:#10B981;">完成</span>
+                  </div>
+                  <div class="h-1 bg-emerald-100 rounded-full">
+                    <div class="h-full bg-emerald-500 rounded-full" style="width:100%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white spin"
+                     style="background:var(--p);font-size:8px;">⟳</div>
+                <div class="flex-1">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="font-medium" style="color:var(--p);">检索相关讲话与金句典故</span>
+                    <span style="color:var(--p);">处理中…</span>
+                  </div>
+                  <div class="h-1 bg-blue-100 rounded-full">
+                    <div class="h-full rounded-full" id="e-sub-bar"
+                         style="width:65%;background:linear-gradient(90deg,#00A0DF,#5BC8F0);transition:width .4s;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 opacity-40">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                     style="background:#E5E7EB;font-size:10px;color:#9CA3AF;">3</div>
+                <div class="flex-1">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-gray-500">整篇改写与差异标注</span>
+                    <span class="text-gray-400">待处理</span>
+                  </div>
+                  <div class="h-1 bg-gray-100 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div class="ldots flex gap-2 mt-8"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Result -->
+        <div id="ep3" class="hidden">
+          <div class="grid grid-cols-3 gap-6">
+            <!-- Result with diff (2/3) -->
+            <div class="col-span-2">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-gray-700">升华结果</span>
+                  <span class="badge badge-beta">学习专栏 + 金句用典</span>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-gray-400">
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm d-add inline-block"></span>新增</span>
+                  <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm d-del inline-block"></span>替换</span>
+                </div>
+              </div>
+              <div id="e-result-inner"
+                   class="bg-white rounded-xl border border-gray-200 p-5 prose overflow-y-auto"
+                   style="height:500px;"></div>
+
+              <!-- Warning -->
+              <div class="mt-3 rounded-xl p-3.5 flex items-start gap-2"
+                   style="background:#FFFBEB;border:1px solid #FDE68A;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="mt-0.5 flex-shrink-0">
+                  <path d="M7 1.5L1 12.5h12L7 1.5z" stroke="#D97706" stroke-width="1.3" stroke-linejoin="round"/>
+                  <path d="M7 6v3.5M7 10.5v.5" stroke="#D97706" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                <p class="text-xs text-amber-700 leading-relaxed">
+                  升华改写可能改变部分原文表达，请核对语境、事实与引用准确性，确认符合意图后再使用。
+                </p>
+              </div>
+            </div>
+
+            <!-- Source citations (1/3) -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-sm font-medium text-gray-700">引用来源</span>
+                <span class="text-xs text-gray-400">3 处引用</span>
+              </div>
+              <div class="space-y-3">
+                <div class="rounded-xl border border-gray-100 bg-white p-4">
+                  <div class="mb-2"><span class="badge source-tag-lx text-xs">学习专栏</span></div>
+                  <p class="text-xs font-semibold text-gray-800 mb-2">《习近平关于新发展理念的论述摘编》</p>
+                  <p class="text-xs text-gray-500 leading-relaxed border-l-2 border-gray-200 pl-2.5">
+                    "高质量发展是全面建设社会主义现代化国家的首要任务……"
+                  </p>
+                </div>
+                <div class="rounded-xl border border-gray-100 bg-white p-4">
+                  <div class="mb-2"><span class="badge source-tag-jj text-xs">金句用典</span></div>
+                  <p class="text-xs font-semibold text-gray-800 mb-2">《论语·为政》</p>
+                  <p class="text-xs text-gray-500 leading-relaxed border-l-2 border-gray-200 pl-2.5">
+                    "学而不思则罔，思而不学则殆。"——强调学用结合、知行合一。
+                  </p>
+                </div>
+                <div class="rounded-xl border border-gray-100 bg-white p-4">
+                  <div class="mb-2"><span class="badge source-tag-lx text-xs">学习专栏</span></div>
+                  <p class="text-xs font-semibold text-gray-800 mb-2">2024年中央经济工作会议精神</p>
+                  <p class="text-xs text-gray-500 leading-relaxed border-l-2 border-gray-200 pl-2.5">
+                    "坚持问题导向，着力破解制约高质量发展的结构性矛盾……"
+                  </p>
+                </div>
+              </div>
+              <!-- Source filter -->
+              <div class="mt-4 pt-4 border-t border-gray-100">
+                <div class="text-xs text-gray-500 mb-2">按类型筛选</div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button class="chip on text-xs py-1 px-2.5">全部</button>
+                  <button class="chip text-xs py-1 px-2.5">学习专栏</button>
+                  <button class="chip text-xs py-1 px-2.5">金句用典</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <div class="flex gap-2">
+              <button class="btn-s text-sm" onclick="setElevatePanel(1)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M8.5 3L4.5 6.5l4 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                重新升华
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn-g text-sm">下载</button>
+              <button class="btn-g text-sm">在线预览</button>
+              <button class="btn-p text-sm" onclick="showToast('success','已在编辑器中打开，可继续修改')">
+                进入编辑器
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M5 3l4 3.5-4 3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         PAGE: LAYOUT 排版
+    ════════════════════════════════════ -->
+    <div id="page-layout" class="page">
+      <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center gap-3 z-10">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--p-lt);">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="1" width="6" height="8" rx="1.2" stroke="#00A0DF" stroke-width="1.4"/>
+            <rect x="9" y="1" width="6" height="4" rx="1.2" stroke="#00A0DF" stroke-width="1.4"/>
+            <rect x="1" y="11" width="14" height="4" rx="1.2" stroke="#00A0DF" stroke-width="1.4"/>
+            <rect x="9" y="7" width="6" height="2.5" rx=".6" stroke="#00A0DF" stroke-width="1.4"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold tracking-tight text-gray-900">排版</h1>
+          <p class="text-xs text-gray-500">上传模板 · 提取格式 · 一键套用</p>
+        </div>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-8 py-8">
+        <div class="grid grid-cols-5 gap-6">
+
+          <!-- Template list -->
+          <div class="col-span-2">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <div class="text-sm font-semibold text-gray-800">我的模板</div>
+                <div class="text-xs text-gray-400 mt-0.5">已使用 3 / 5 个</div>
+              </div>
+              <button class="btn-p text-xs py-1.5 px-3" onclick="openUploadModal()">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M5.5 1v9M1 5.5h9" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                上传模板
+              </button>
+            </div>
+
+            <!-- Quota bar -->
+            <div class="mb-4 rounded-xl p-3 bg-gray-50 border border-gray-100">
+              <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+                <span>模板容量</span><span>3 / 5</span>
+              </div>
+              <div class="h-1.5 bg-gray-200 rounded-full">
+                <div class="h-full rounded-full" style="width:60%;background:var(--p);"></div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1.5">还可添加 2 个模板</p>
+            </div>
+
+            <div class="space-y-2.5" id="layout-tpl-list"></div>
+          </div>
+
+          <!-- Apply panel -->
+          <div class="col-span-3">
+            <div class="mb-4">
+              <div class="text-sm font-semibold text-gray-800">排版设置</div>
+              <p class="text-xs text-gray-500 mt-0.5">选择模板，上传或输入内容，系统自动套用格式</p>
+            </div>
+
+            <!-- Selected template info -->
+            <div class="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-sm font-medium text-gray-600">当前模板：</span>
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:var(--p-lt);">
+                  <div class="w-5 h-5 rounded flex items-center justify-center" style="background:var(--p);">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                      <path d="M2 8V2h4l2 2v6H2z" stroke="#fff" stroke-width="1" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold" id="layout-tpl-name" style="color:var(--p);">机关公文模板</span>
+                </div>
+                <button class="btn-g text-xs" onclick="navigate('templates')">更换</button>
+              </div>
+              <div class="grid grid-cols-3 gap-3">
+                <div class="rounded-lg p-3 bg-gray-50">
+                  <div class="text-xs text-gray-400 mb-1">正文字体</div>
+                  <div class="text-xs font-semibold text-gray-800">仿宋 GB2312</div>
+                  <div class="text-xs text-gray-500 mt-0.5">三号字</div>
+                </div>
+                <div class="rounded-lg p-3 bg-gray-50">
+                  <div class="text-xs text-gray-400 mb-1">页边距</div>
+                  <div class="text-xs font-semibold text-gray-800">上 2.54cm</div>
+                  <div class="text-xs text-gray-500 mt-0.5">左 3.17cm</div>
+                </div>
+                <div class="rounded-lg p-3 bg-gray-50">
+                  <div class="text-xs text-gray-400 mb-1">行距</div>
+                  <div class="text-xs font-semibold text-gray-800">固定值 28磅</div>
+                  <div class="text-xs text-gray-500 mt-0.5">段前 0磅</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content input -->
+            <div class="mb-4">
+              <div class="text-sm font-medium text-gray-700 mb-2">排版内容</div>
+              <div class="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all"
+                   style="border-color:#D1D5DB;" id="layout-drop"
+                   ondragover="event.preventDefault();this.style.borderColor='#00A0DF';this.style.background='#F0FBFF';"
+                   ondragleave="this.style.borderColor='#D1D5DB';this.style.background='';"
+                   onclick="document.getElementById('layout-file').click()">
+                <input type="file" id="layout-file" accept=".doc,.docx,.ppt,.pptx,.txt" class="hidden"
+                       onchange="handleLayoutFile(this)">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2" style="background:var(--p-lt);">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 2v12M5 7l5-5 5 5" stroke="#00A0DF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 16v1a1 1 0 001 1h14a1 1 0 001-1v-1" stroke="#00A0DF" stroke-width="1.6" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="text-sm font-medium text-gray-600">上传待排版文档</div>
+                <div class="text-xs text-gray-400 mt-1">.doc .docx .ppt .pptx，或点击选择文件</div>
+              </div>
+              <div class="flex items-center gap-3 my-3">
+                <div class="h-px flex-1 bg-gray-100"></div>
+                <span class="text-xs text-gray-400">或直接粘贴文本</span>
+                <div class="h-px flex-1 bg-gray-100"></div>
+              </div>
+              <textarea rows="5" placeholder="粘贴文章内容到这里…" style="font-size:13px;line-height:1.7;"></textarea>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-xs text-gray-400">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M6 5.5v3M6 4v.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+                套用后可进入编辑器手动微调
+              </div>
+              <button class="btn-p" onclick="applyLayout()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="1" y="1" width="5" height="6" rx="1" stroke="#fff" stroke-width="1.3"/>
+                  <rect x="8" y="1" width="5" height="3" rx="1" stroke="#fff" stroke-width="1.3"/>
+                  <rect x="1" y="9" width="12" height="4" rx="1" stroke="#fff" stroke-width="1.3"/>
+                </svg>
+                一键套用排版
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         PAGE: TEMPLATES 模板管理
+    ════════════════════════════════════ -->
+    <div id="page-templates" class="page">
+      <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between z-10">
+        <div>
+          <h1 class="text-lg font-semibold tracking-tight text-gray-900">模板管理</h1>
+          <p class="text-xs text-gray-500 mt-0.5">管理个人格式模板，最多保存 5 个</p>
+        </div>
+        <button class="btn-p text-sm" onclick="openUploadModal()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1v11M1 6.5h11" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+          上传新模板
+        </button>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-8 py-8">
+        <!-- Stats row -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+          <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <div class="text-2xl font-bold text-gray-900">3</div>
+            <div class="text-xs text-gray-500 mt-0.5">已保存模板</div>
+            <div class="text-xs text-gray-400 mt-0.5">最多 5 个</div>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <div class="text-2xl font-bold text-gray-900">2</div>
+            <div class="text-xs text-gray-500 mt-0.5">Word 模板</div>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <div class="text-2xl font-bold" style="color:var(--p);">1</div>
+            <div class="text-xs text-gray-500 mt-0.5">PPT 模板</div>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-100 p-4">
+            <div class="text-2xl font-bold text-gray-900">47</div>
+            <div class="text-xs text-gray-500 mt-0.5">累计套用次数</div>
+          </div>
+        </div>
+
+        <!-- Template grid -->
+        <div class="grid grid-cols-3 gap-5" id="tpl-grid"></div>
+
+        <!-- Add slot -->
+        <div class="mt-5">
+          <button class="w-full rounded-xl border-2 border-dashed border-gray-200 p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-blue-300 transition-all text-center"
+                  onclick="openUploadModal()">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#F3F4F6;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 2v14M2 9h14" stroke="#9CA3AF" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="text-sm font-medium text-gray-500">添加新模板</div>
+            <div class="text-xs text-gray-400">支持 Word / PPT，单文件 100MB 以内</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════
+         PLACEHOLDER PAGES
+    ════════════════════════════════════ -->
+    <!-- ════════════════════════════════════
+         PAGE: KNOWLEDGE HUB AI 知识中枢
+    ════════════════════════════════════ -->
+    <div id="page-knowledge" class="page">
+      <div class="min-h-screen flex flex-col"
+           style="background:linear-gradient(160deg,#EEF7FF 0%,#F2F9FF 55%,#FAFCFF 100%);">
+
+        <!-- Top right actions -->
+        <div class="flex items-center justify-end gap-3 px-8 py-3.5">
+          <button class="btn-g p-2" onclick="showToast('info','文档功能即将上线')">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 2h7.5L15 5.5V16H4V2z" stroke="#6B7280" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M11.5 2v4H15M6 9h6M6 11.5h4" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button class="btn-g p-2" onclick="showToast('info','资源库功能即将上线')">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect x="2" y="4" width="14" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.4"/>
+              <rect x="2" y="10" width="14" height="4" rx="1.2" stroke="#6B7280" stroke-width="1.4"/>
+              <circle cx="4.5" cy="6" r=".9" fill="#6B7280"/>
+              <circle cx="4.5" cy="12" r=".9" fill="#6B7280"/>
+            </svg>
+          </button>
+          <button class="relative p-2 rounded-lg hover:bg-white/60 cursor-pointer transition-all"
+                  onclick="showToast('info','AI 模型选择即将上线')">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2L11.5 7 17 8l-4 3.5 1 5.5-5-2.5L4 17l1-5.5L1 8l5.5-1z"
+                    stroke="#6B7280" stroke-width="1.4" stroke-linejoin="round"/>
+            </svg>
+            <span class="absolute -top-1 -right-1 text-white rounded px-1"
+                  style="font-size:8px;font-weight:700;background:#1677FF;line-height:14px;">NEW</span>
+          </button>
+          <button class="btn-g p-2" onclick="showToast('info','更多应用即将上线')">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+              <rect x="10" y="2" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+              <rect x="2" y="10" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+              <rect x="10" y="10" width="6" height="6" rx="1.5" stroke="#6B7280" stroke-width="1.4"/>
+            </svg>
+          </button>
+          <div class="flex items-center gap-2 pl-2 border-l border-gray-200">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold"
+                 style="background:linear-gradient(135deg,#00A0DF,#0082B8);">1</div>
+            <div class="rounded px-2 py-0.5 text-xs font-semibold text-white cursor-pointer"
+                 style="background:linear-gradient(90deg,#00A0DF,#0082B8);">尊享版X</div>
+          </div>
+        </div>
+
+        <!-- Centered content -->
+        <div class="flex flex-col items-center px-6 pb-16" style="padding-top:4vh;">
+
+          <!-- Title -->
+          <h1 class="font-bold text-center mb-8"
+              style="font-size:34px;color:#1A2B4A;letter-spacing:-.5px;line-height:1.2;">
+            知识&nbsp;&nbsp;
+            <span style="font-size:32px;">📖</span>
+            &nbsp;&nbsp;一触即达
+          </h1>
+
+          <!-- Input box -->
+          <div class="w-full rounded-2xl overflow-visible"
+               style="max-width:680px;background:#fff;box-shadow:0 4px 24px rgba(0,100,200,.1);border:1px solid rgba(255,255,255,.9);">
+            <textarea rows="3" id="kb-input"
+              placeholder="请输入问题或任务"
+              class="w-full px-5 py-4 text-gray-700"
+              style="border:none;box-shadow:none;border-radius:0;font-size:15px;line-height:1.7;resize:none;outline:none;background:transparent;"></textarea>
+
+            <!-- Toolbar -->
+            <div class="flex items-center gap-1.5 px-3.5 py-2.5 border-t" style="border-color:#F0F5FA;">
+              <!-- + dropdown -->
+              <div class="relative">
+                <button id="kb-plus-btn" onclick="toggleKBDrop(event)"
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-lg font-light transition-all"
+                        style="background:var(--p);border:none;cursor:pointer;">+</button>
+                <div id="kb-plus-drop" class="hidden">
+                  <button class="kb-drop-item" onclick="showToast('info','参考资料库功能即将上线')">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                      <rect x="1.5" y="2.5" width="12" height="10" rx="1.5" stroke="#6B7280" stroke-width="1.3"/>
+                      <path d="M4.5 6h6M4.5 9h4" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                    参考资料库
+                  </button>
+                  <button class="kb-drop-item" onclick="showToast('info','正在打开我的知识库')">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                      <path d="M3 13V2h5.5L12 5.5V13H3z" stroke="#6B7280" stroke-width="1.3" stroke-linejoin="round"/>
+                      <path d="M8.5 2v4H12M5 8.5h5M5 11h3" stroke="#6B7280" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                    我的知识库
+                  </button>
+                  <button class="kb-drop-item" onclick="document.getElementById('kb-file-upload').click()">
+                    <input type="file" id="kb-file-upload" class="hidden" onchange="showToast('success','文件上传成功，正在建立知识库')">
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                      <path d="M7.5 1v9M4.5 4l3-3 3 3M2 12.5v1a.7.7 0 00.7.7h9.6a.7.7 0 00.7-.7v-1"
+                            stroke="#6B7280" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    上传本地文件
+                  </button>
+                </div>
+              </div>
+
+              <!-- Web search -->
+              <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      style="color:#374151;background:#F0F6FF;border:1px solid #DBEAFE;"
+                      onclick="showToast('info','网络搜索即将开启')">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6.5" cy="6.5" r="5" stroke="#3B82F6" stroke-width="1.3"/>
+                  <ellipse cx="6.5" cy="6.5" rx="2" ry="5" stroke="#3B82F6" stroke-width="1.3"/>
+                  <path d="M1.5 6.5h10" stroke="#3B82F6" stroke-width="1.3"/>
+                </svg>
+                <span style="color:#3B82F6;">联网</span>
+              </button>
+
+              <!-- AI阅读 -->
+              <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-gray-100"
+                      style="color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;"
+                      onclick="showToast('info','AI阅读功能即将上线')">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M1.5 10V2.5L6 1l4.5 1.5V10L6 12 1.5 10z" stroke="#6B7280" stroke-width="1.2" stroke-linejoin="round"/>
+                  <path d="M6 1v11" stroke="#6B7280" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                AI阅读
+              </button>
+
+              <!-- AI翻译 -->
+              <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-gray-100"
+                      style="color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;"
+                      onclick="showToast('info','AI翻译功能即将上线')">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 3h8M6 3v1M3.5 4C3.5 6.5 5 8 6 9M8.5 4C8.5 6.5 7 8 6 9" stroke="#6B7280" stroke-width="1.2" stroke-linecap="round"/>
+                  <path d="M5 7.5h4M7 6.5l2 3" stroke="#6B7280" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+                AI翻译
+              </button>
+
+              <!-- Joined KB chips (回显已加入的知识库) -->
+              <div id="kb-toolbar-chips" class="flex items-center gap-1.5 flex-wrap"></div>
+
+              <!-- Send -->
+              <button class="w-8 h-8 rounded-xl flex items-center justify-center text-white ml-auto flex-shrink-0 transition-all"
+                      style="background:var(--p);" onclick="showToast('info','请先输入问题')">
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M7.5 12V3M4 6.5l3.5-3.5 3.5 3.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- ══ 知识库 Tab 容器 ══ -->
+          <div class="w-full mt-7" style="max-width:740px;">
+
+            <!-- Tab bar -->
+            <div class="flex items-center border-b" style="border-color:#E8EBF0;">
+              <button id="kbt-rec" onclick="switchKBMainTab('rec')"
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all"
+                      style="color:var(--p);border-bottom:2.5px solid var(--p);margin-bottom:-1px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M6.5 1l1.4 3.1 3.5.7-2.5 2.4.5 3.4L6.5 9l-2.9 1.6.5-3.4L1.6 4.8l3.5-.7z"
+                        stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+                推荐知识库
+                <span class="text-xs" style="color:#C4CAD4;">加入后可直接引用</span>
+              </button>
+              <button id="kbt-mine" onclick="switchKBMainTab('mine')"
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all"
+                      style="color:#9CA3AF;border-bottom:2.5px solid transparent;margin-bottom:-1px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M2 12c0-2.2 2.02-4 4.5-4S11 9.8 11 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                加入知识库
+                <span id="my-kbs-count"
+                      class="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style="background:#E5E7EB;color:#6B7280;min-width:18px;text-align:center;font-size:10px;">1</span>
+              </button>
+            </div>
+
+            <!-- Panel: 推荐知识库 -->
+            <div id="kbp-rec" class="pt-5 pb-4">
+              <div class="grid gap-3" id="rec-kbs-grid"
+                   style="grid-template-columns:repeat(4,1fr);">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Panel: 加入知识库 -->
+            <div id="kbp-mine" class="hidden pt-5 pb-4">
+              <div class="flex flex-wrap gap-3" id="my-kbs-grid">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div id="page-writing" class="page">
+      <div class="flex flex-col items-center justify-center h-screen text-gray-400" style="margin-top:-60px;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-purple-50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 3.5L20.5 9 8.5 21H3.5V16L15.5 4" stroke="#7C3AED" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-gray-600">AI 写作功能</div>
+        <div class="text-sm text-gray-400 mt-1">此功能已在系统中实现，本原型专注展示「智能办公」模块</div>
+        <button class="btn-p mt-6 text-sm" onclick="navigate('polish')">体验润色功能 →</button>
+      </div>
+    </div>
+    <!-- ─── History full page ─── -->
+    <div id="page-history" class="page">
+      <div class="sticky top-0 bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between z-10">
+        <div class="flex items-center gap-3">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="#6B7280" stroke-width="1.5"/>
+            <path d="M9 5v5l3 2" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 tracking-tight">历史记录</h1>
+            <p class="text-xs text-gray-400 mt-0.5">全部对话与处理记录</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="搜索历史记录…"
+                 style="width:200px;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid #E5E7EB;outline:none;">
+          <button class="btn-g text-sm" onclick="showToast('info','批量删除功能即将支持')">清空记录</button>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto px-8 py-6">
+        <!-- Filter tabs -->
+        <div class="flex items-center gap-1 mb-6 p-1 rounded-xl w-fit" style="background:#F3F4F6;">
+          <button class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all"
+                  style="background:#fff;color:var(--p);box-shadow:0 1px 3px rgba(0,0,0,.08);"
+                  onclick="filterHistory(this,'all')">全部</button>
+          <button class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 transition-all"
+                  onclick="filterHistory(this,'polish')">润色</button>
+          <button class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 transition-all"
+                  onclick="filterHistory(this,'elevate')">升华</button>
+          <button class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 transition-all"
+                  onclick="filterHistory(this,'layout')">排版</button>
+          <button class="px-4 py-1.5 rounded-lg text-sm font-medium text-gray-500 transition-all"
+                  onclick="filterHistory(this,'write')">写作</button>
+        </div>
+
+        <!-- History list -->
+        <div class="bg-white rounded-xl border border-gray-100 divide-y divide-gray-50" id="history-page-list">
+          <!-- Items injected by JS -->
+        </div>
+        <p class="text-center text-xs text-gray-400 mt-6">已显示全部 10 条记录</p>
+      </div>
+    </div>
+
+    <div id="page-research" class="page">
+      <div class="flex flex-col items-center justify-center h-screen text-gray-400" style="margin-top:-60px;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-amber-50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="10" cy="10" r="7" stroke="#D97706" stroke-width="1.6"/>
+            <path d="M16 16l5 5" stroke="#D97706" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-gray-600">深度研究功能</div>
+        <div class="text-sm text-gray-400 mt-1">此功能已在系统中实现，本原型专注展示「智能办公」模块</div>
+        <button class="btn-p mt-6 text-sm" onclick="navigate('elevate')">体验升华功能 →</button>
+      </div>
+    </div>
+    <div id="page-ppt" class="page">
+      <div class="flex flex-col items-center justify-center h-screen text-gray-400" style="margin-top:-60px;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-red-50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="4" width="20" height="14" rx="2" stroke="#EF4444" stroke-width="1.6"/>
+            <path d="M10 22l2-4 2 4M8 22h8" stroke="#EF4444" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-gray-600">AI PPT 功能</div>
+        <div class="text-sm text-gray-400 mt-1">此功能已在系统中实现，本原型专注展示「智能办公」模块</div>
+        <button class="btn-p mt-6 text-sm" onclick="navigate('layout')">体验排版功能 →</button>
+      </div>
+    </div>
+    <div id="page-meeting" class="page">
+      <div class="flex flex-col items-center justify-center h-screen text-gray-400" style="margin-top:-60px;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-emerald-50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke="#10B981" stroke-width="1.6"/>
+            <path d="M8 4V2M16 4V2M2 10h20" stroke="#10B981" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-gray-600">会议纪要功能</div>
+        <div class="text-sm text-gray-400 mt-1">此功能已在系统中实现，本原型专注展示「智能办公」模块</div>
+        <button class="btn-p mt-6 text-sm" onclick="navigate('home')">返回首页 →</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+
+<!-- ════════════════════════════════════
+     MODAL: UPLOAD TEMPLATE
+════════════════════════════════════ -->
+<div class="overlay" id="upload-modal">
+  <div class="bg-white rounded-2xl shadow-2xl w-[480px] max-w-full mx-4 overflow-hidden">
+    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">上传格式模板</h2>
+        <p class="text-xs text-gray-400 mt-0.5">支持 Word / PPT，单文件小于 100MB</p>
+      </div>
+      <button class="btn-g w-8 h-8 p-0 flex items-center justify-center" onclick="closeUploadModal()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M3.5 3.5l8 8M11.5 3.5l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <!-- Drop zone -->
+      <div id="m-drop" class="border-2 border-dashed rounded-xl transition-all cursor-pointer"
+           style="border-color:#E5E7EB;"
+           ondragover="event.preventDefault();document.getElementById('m-drop').style.borderColor='#00A0DF';"
+           ondragleave="document.getElementById('m-drop').style.borderColor='#E5E7EB';"
+           onclick="document.getElementById('m-file').click()">
+        <input type="file" id="m-file" accept=".doc,.docx,.ppt,.pptx" class="hidden" onchange="handleUploadFile(this)">
+        <!-- Empty state -->
+        <div id="m-empty" class="flex flex-col items-center gap-2 py-8">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:var(--p-lt);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3v14M5 10l7-7 7 7" stroke="#00A0DF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 19v1a1 1 0 001 1h16a1 1 0 001-1v-1" stroke="#00A0DF" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-700">拖拽文件到此处，或点击选择</p>
+          <p class="text-xs text-gray-400">.doc .docx .ppt .pptx · 单文件 &lt; 100MB</p>
+        </div>
+        <!-- File selected state -->
+        <div id="m-selected" class="hidden p-4">
+          <div class="flex items-center gap-3 p-3.5 rounded-xl" style="background:#F0FBFF;border:1.5px solid var(--p);">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--p-lt);">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 2h8l5 5v11H5V2z" stroke="#00A0DF" stroke-width="1.4" stroke-linejoin="round"/>
+                <path d="M13 2v6h5" stroke="#00A0DF" stroke-width="1.4" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-medium text-gray-800 truncate" id="m-fname">机关公文模板.docx</div>
+              <div class="text-xs text-gray-500 mt-0.5" id="m-fsize">2.4 MB</div>
+            </div>
+            <button onclick="event.stopPropagation();clearUploadFile()" class="btn-g w-7 h-7 p-0 flex items-center justify-center flex-shrink-0">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M3 3l7 7M10 3l-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Extract progress -->
+          <div id="m-progress" class="mt-4 hidden">
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="font-medium text-gray-700" id="m-prog-txt">正在解析文档结构…</span>
+              <span style="color:var(--p);" id="m-prog-pct">0%</span>
+            </div>
+            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div id="m-prog-bar" class="h-full rounded-full transition-all duration-400"
+                   style="width:0%;background:linear-gradient(90deg,#00A0DF,#5BC8F0);"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1.5" id="m-prog-detail">分析页眉页脚、多级标题样式…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta fields -->
+      <div class="mt-4 space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">模板名称</label>
+          <input type="text" id="m-tname" placeholder="如：机关单位公文模板" value="机关公文模板">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">适用场景（可选）</label>
+          <input type="text" id="m-tscene" placeholder="如：党政机关正式公文、汇报材料">
+        </div>
+        <label class="flex items-center gap-2.5 cursor-pointer">
+          <input type="checkbox" id="m-tdefault" style="accent-color:var(--p);width:14px;height:14px;">
+          <span class="text-sm text-gray-700">设为默认模板</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+      <button class="btn-g text-sm" onclick="closeUploadModal()">取消</button>
+      <button class="btn-p text-sm" onclick="submitUpload()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 1v8M3.5 5l3-4 3 4M1.5 10v1a.8.8 0 00.8.8h8.4a.8.8 0 00.8-.8v-1"
+                stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        提取并保存
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     MODAL: EDIT TEMPLATE
+════════════════════════════════════ -->
+<div class="overlay" id="edit-modal">
+  <div class="bg-white rounded-2xl shadow-2xl w-[520px] max-w-full mx-4 overflow-hidden">
+    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="text-base font-semibold text-gray-900">编辑模板</h2>
+      <button class="btn-g w-8 h-8 p-0 flex items-center justify-center" onclick="closeEditModal()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M3.5 3.5l8 8M11.5 3.5l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4 overflow-y-auto" style="max-height:500px;">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">模板名称</label>
+          <input type="text" value="机关公文模板">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">适用场景</label>
+          <input type="text" value="党政机关正式公文">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">字体规范</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div><div class="text-xs text-gray-400 mb-1">标题字体</div><input type="text" value="方正小标宋简体"></div>
+          <div><div class="text-xs text-gray-400 mb-1">正文字体</div><input type="text" value="仿宋 GB2312"></div>
+          <div><div class="text-xs text-gray-400 mb-1">标题字号</div><input type="text" value="二号"></div>
+          <div><div class="text-xs text-gray-400 mb-1">正文字号</div><input type="text" value="三号"></div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">页边距（cm）</label>
+        <div class="grid grid-cols-4 gap-2">
+          <div><div class="text-xs text-gray-400 mb-1">上</div><input type="text" value="2.54"></div>
+          <div><div class="text-xs text-gray-400 mb-1">下</div><input type="text" value="2.54"></div>
+          <div><div class="text-xs text-gray-400 mb-1">左</div><input type="text" value="3.17"></div>
+          <div><div class="text-xs text-gray-400 mb-1">右</div><input type="text" value="3.17"></div>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">行距</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div><div class="text-xs text-gray-400 mb-1">行距类型</div><input type="text" value="固定值"></div>
+          <div><div class="text-xs text-gray-400 mb-1">行距值</div><input type="text" value="28磅"></div>
+        </div>
+      </div>
+      <label class="flex items-center gap-2.5 cursor-pointer">
+        <input type="checkbox" checked style="accent-color:var(--p);width:14px;height:14px;">
+        <span class="text-sm text-gray-700">设为默认模板</span>
+      </label>
+    </div>
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+      <button class="btn-g text-sm text-red-500 hover:text-red-600"
+              onclick="closeEditModal();showToast('success','模板已删除')">删除模板</button>
+      <div class="flex gap-2">
+        <button class="btn-s text-sm" onclick="closeEditModal()">取消</button>
+        <button class="btn-p text-sm" onclick="closeEditModal();showToast('success','模板信息已更新')">保存修改</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const tpls = [
+  { id:1, name:'机关公文模板', type:'word', scene:'党政机关正式公文', isDefault:true,  uses:28, lastUsed:'6月1日',  size:'2.4MB',  font:'仿宋 GB2312 / 方正小标宋' },
+  { id:2, name:'公司汇报PPT',  type:'ppt',  scene:'季度汇报 · 年终总结', isDefault:false, uses:15, lastUsed:'5月30日', size:'5.8MB',  font:'HarmonyOS Sans' },
+  { id:3, name:'工作总结Word', type:'word', scene:'年度工作总结报告', isDefault:false, uses:4,  lastUsed:'5月20日', size:'1.2MB',  font:'宋体 / 黑体' },
+];
+let selTpl = 0;
+let chartInst = null;
+
+// Polish diff result
+const POLISH_DIFF = `
+<p class="mb-3 font-semibold">关于<span class="d-add">进一步</span>加强基层治理工作的通知</p>
+<p class="mb-3">各<span class="d-del">单位</span><span class="d-add">相关单位</span>：</p>
+<p class="mb-3">为<span class="d-add">深入贯彻落实上级关于加强基层治理工作的部署要求，全面</span>推进<span class="d-del">社区建设稳步发展，特制定以下措施。要强化网格化管理，把每个社区划分成若干小网格，安排专人负责，实现对居民情况的掌握和管理。</span><span class="d-add">基层社区建设高质量发展，现就有关工作通知如下。一是强化网格化精细管理，将各社区科学划分为若干责任网格，明确专职网格员负责制，切实掌握辖区居民基本情况，实现信息精准采集与动态管理。</span></p>
+<p class="mb-3"><span class="d-del">要注重信息化手段的运用，建设智慧社区平台，打通各部门之间的数据壁垒，提高工作效率。要加强社区志愿者队伍建设，吸纳更多有爱心有能力的居民参与社区服务。</span><span class="d-add">二是充分运用信息化手段，加快推进智慧社区平台建设，着力打通各职能部门数据共享壁垒，有效提升基层治理工作效能。三是大力加强社区志愿服务队伍建设，广泛吸纳热心公益、能力突出的居民群众积极参与社区服务工作。</span></p>
+<p><span class="d-del">要完善社区议事机制，让居民有地方反映问题和诉求，真正实现共建共治共享的基层治理格局。</span><span class="d-add">四是健全完善社区协商议事机制，多渠道畅通居民诉求表达渠道，切实保障群众有序参与社区事务，着力构建党建引领、多方协同的共建共治共享基层治理新格局。</span></p>
+<p class="mt-3 text-xs text-right text-gray-400">特此通知。</p>`;
+
+// Elevate diff result
+const ELEVATE_DIFF = `
+<p class="mb-3 font-semibold">2025年度工作总结报告</p>
+<p class="mb-3"><span class="d-add">习近平总书记指出，"高质量发展是全面建设社会主义现代化国家的首要任务。"</span>今年以来，我单位<span class="d-del">认真</span><span class="d-add">深入学习贯彻习近平新时代中国特色社会主义思想，</span>贯彻落实上级部署要求，以高质量发展为主线，<span class="d-add">践行"干一件事、成一件事"的实干精神，</span>扎实推进各项工作，取得了<span class="d-del">一定</span><span class="d-add">积极</span>成效。</p>
+<p class="mb-3 font-semibold">一、主要工作完成情况</p>
+<p class="mb-3">在经济发展方面，<span class="d-add">坚持"稳中求进"工作总基调，</span>全年完成产值同比增长12%，<span class="d-del">主要指标均达到年初预定目标</span><span class="d-add">各项主要经济指标高质量完成年初目标，发展成色更足</span>。在队伍建设方面，<span class="d-add">以"学而不思则罔，思而不学则殆"为镜，坚持学用结合、知行合一，</span>开展了系列<span class="d-del">培训活动</span><span class="d-add">高质量学习培训活动</span>，干部队伍整体素质得到<span class="d-del">提升</span><span class="d-add">显著提升</span>。在民生保障方面，<span class="d-add">始终把人民群众对美好生活的向往作为奋斗目标，</span>持续加大投入，群众<span class="d-del">满意度明显提高</span><span class="d-add">获得感、幸福感、安全感明显增强</span>。</p>
+<p class="mb-3 font-semibold">二、存在的问题</p>
+<p class="mb-3">工作中也<span class="d-del">存在一些问题，主要是创新能力不足，工作方法比较单一，还需要进一步提升</span><span class="d-add">暴露出一些短板弱项：创新驱动能力有待加强，工作方式方法亟待丰富，与高质量发展要求相比仍存在差距，需有的放矢加以解决</span>。</p>
+<p class="mb-3 font-semibold">三、下一步打算</p>
+<p><span class="d-del">坚持问题导向，有针对性地补短板强弱项，推动各项工作再上新台阶，为实现高质量发展目标而不懈努力。</span><span class="d-add">深入贯彻落实中央经济工作会议精神，坚持问题导向与目标导向相结合，<strong>锚定高质量发展首要任务</strong>，以"功成不必在我、功成必定有我"的担当精神，在补短板、强弱项上下真功夫，奋力推动各项工作迈上新台阶，以优异成绩迎接新的历史考验。</span></p>`;
+
+// ══════════════════════════════════════════════
+// KNOWLEDGE HUB (AI 知识中枢)
+// ══════════════════════════════════════════════
+const kbsData = [
+  { id:'policy',    name:'政策库',   desc:'国家及地方政策文件汇编',  count:'5,310', color:'#00A0DF', bg:'#E0F4FB', icon:'📋' },
+  { id:'law',       name:'法律法规', desc:'国家法律法规全文检索',    count:'8,240', color:'#3B82F6', bg:'#EFF6FF', icon:'⚖️' },
+  { id:'emergency', name:'应急执法', desc:'应急管理执法规范标准',    count:'1,856', color:'#EF4444', bg:'#FEF2F2', icon:'🚨' },
+  { id:'industry',  name:'工信政策', desc:'工业和信息化政策文件',    count:'3,621', color:'#F97316', bg:'#FFF7ED', icon:'🏭' },
+  { id:'learning',  name:'学习专栏', desc:'重要理论与政策解读',      count:'2,108', color:'#F59E0B', bg:'#FFFBEB', icon:'📚' },
+  { id:'party',     name:'党建知识', desc:'党史党建系列教材',        count:'4,573', color:'#DC2626', bg:'#FFF0F0', icon:'🔖' },
+  { id:'finance',   name:'财务管理', desc:'国家财务会计准则',        count:'1,240', color:'#059669', bg:'#F0FDF4', icon:'💹' },
+  { id:'safety',    name:'安全生产', desc:'安全生产法规标准',        count:'987',   color:'#D97706', bg:'#FFFBEB', icon:'⚠️' },
+];
+const joinedKBs = new Set();
+
+function renderMyKBs() {
+  const el = document.getElementById('my-kbs-grid');
+  const countEl = document.getElementById('my-kbs-count');
+  if (!el) return;
+  const joined = [...joinedKBs].map(id => kbsData.find(k => k.id===id)).filter(Boolean);
+  const total = 1 + joined.length; // 1 = 我的知识库
+  if (countEl) countEl.textContent = total;
+  const myCard = `
+    <div class="kb-my-card mine" onclick="showToast('info','我的知识库：管理你上传的文档')">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+           style="background:linear-gradient(135deg,#00A0DF,#0082B8);">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M4 2h7l4 4v10H4V2z" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M11 2v5h4M9 10v4M7 12h4" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <div class="text-sm font-semibold" style="color:#005D8E;">我的知识库</div>
+        <div class="text-xs text-gray-500 mt-0.5">上传文档建立专属知识库</div>
+      </div>
+    </div>`;
+
+  const joinedCards = joined.map(kb => `
+    <div class="kb-my-card" onclick="showToast('info','正在使用「${kb.name}」知识库')">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+           style="background:${kb.bg};">${kb.icon}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-gray-800">${kb.name}</div>
+        <div class="text-xs text-gray-400 mt-0.5 truncate">${kb.desc}</div>
+      </div>
+      <button onclick="event.stopPropagation();leaveKB('${kb.id}')"
+              class="flex-shrink-0 text-xs text-gray-400 hover:text-red-500 transition-colors"
+              title="移除" style="border:none;background:none;cursor:pointer;padding:2px;">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M3 3l7 7M10 3l-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>`).join('');
+
+  el.innerHTML = myCard + joinedCards;
+}
+
+function renderRecGrid() {
+  const el = document.getElementById('rec-kbs-grid');
+  if (!el) return;
+  el.innerHTML = kbsData.map(kb => {
+    const isJoined = joinedKBs.has(kb.id);
+    return `
+      <div class="kb-rec-card">
+        <div class="flex items-start justify-between mb-2.5">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+               style="background:${kb.bg};">${kb.icon}</div>
+          ${isJoined
+            ? `<button class="kb-joined-btn" onclick="leaveKB('${kb.id}')">已加入</button>`
+            : `<button class="kb-join-btn" onclick="joinKB('${kb.id}')">加入</button>`}
+        </div>
+        <div class="text-sm font-semibold text-gray-800 mb-1">${kb.name}</div>
+        <div class="text-xs text-gray-500 leading-relaxed mb-2">${kb.desc}</div>
+        <div class="text-xs font-medium" style="color:${kb.color};">${kb.count} 份文档</div>
+      </div>`;
+  }).join('');
+}
+
+function joinKB(id) {
+  joinedKBs.add(id);
+  const kb = kbsData.find(k => k.id===id);
+  renderMyKBs(); renderRecGrid(); renderToolbarChips();
+  showToast('success', `已加入「${kb?.name}」知识库`);
+}
+
+function leaveKB(id) {
+  joinedKBs.delete(id);
+  const kb = kbsData.find(k => k.id===id);
+  renderMyKBs(); renderRecGrid(); renderToolbarChips();
+  showToast('info', `已移除「${kb?.name}」知识库`);
+}
+
+function renderToolbarChips() {
+  const el = document.getElementById('kb-toolbar-chips');
+  if (!el) return;
+  const joined = [...joinedKBs].map(id => kbsData.find(k => k.id===id)).filter(Boolean);
+  if (!joined.length) { el.innerHTML = ''; return; }
+  el.innerHTML = joined.map(kb => `
+    <span class="flex items-center gap-1 pl-2 pr-1.5 py-1 rounded-lg text-xs font-medium transition-all"
+          style="background:${kb.bg};border:1px solid ${kb.color}22;color:${kb.color};">
+      <span style="font-size:11px;">${kb.icon}</span>
+      ${kb.name}
+      <button onclick="leaveKB('${kb.id}')"
+              style="border:none;background:none;cursor:pointer;padding:0;margin-left:1px;color:${kb.color};opacity:.6;line-height:1;font-size:11px;"
+              onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.6'">✕</button>
+    </span>`).join('');
+}
+
+function switchKBMainTab(tab) {
+  const isMine = tab === 'mine';
+  document.getElementById('kbp-mine').classList.toggle('hidden', !isMine);
+  document.getElementById('kbp-rec').classList.toggle('hidden', isMine);
+  const tMine = document.getElementById('kbt-mine');
+  const tRec  = document.getElementById('kbt-rec');
+  const cnt   = document.getElementById('my-kbs-count');
+  if (tMine) {
+    tMine.style.color = isMine ? 'var(--p)' : '#9CA3AF';
+    tMine.style.fontWeight = isMine ? '600' : '500';
+    tMine.style.borderBottomColor = isMine ? 'var(--p)' : 'transparent';
+  }
+  if (cnt) {
+    cnt.style.background = isMine ? 'var(--p)' : '#E5E7EB';
+    cnt.style.color = isMine ? '#fff' : '#6B7280';
+  }
+  if (tRec) {
+    tRec.style.color = !isMine ? 'var(--p)' : '#9CA3AF';
+    tRec.style.fontWeight = !isMine ? '600' : '500';
+    tRec.style.borderBottomColor = !isMine ? 'var(--p)' : 'transparent';
+  }
+}
+
+function toggleKBDrop(e) {
+  e.stopPropagation();
+  const d = document.getElementById('kb-plus-drop');
+  if (d) d.classList.toggle('hidden');
+}
+// Close dropdown on outside click
+document.addEventListener('click', () => {
+  const d = document.getElementById('kb-plus-drop');
+  if (d && !d.classList.contains('hidden')) d.classList.add('hidden');
+});
+
+// ══════════════════════════════════════════════
+// HISTORY PAGE
+// ══════════════════════════════════════════════
+const historyItems = [
+  { id:1, type:'polish',  icon:'Aα', color:'#E0F4FB', tc:'#00A0DF', title:'关于加强基层治理工作的通知润色', sub:'公文文风 · 字数 238',  time:'2025-06-03 16:18', status:'done' },
+  { id:2, type:'elevate', icon:'⭐', color:'#FEF3C7', tc:'#D97706', title:'2025年度工作总结报告升华改写',   sub:'学习专栏+金句用典',     time:'2025-06-03 15:44', status:'done' },
+  { id:3, type:'layout',  icon:'⊞', color:'#E0F4FB', tc:'#00A0DF', title:'Q2季度汇报PPT排版套用',        sub:'公司汇报PPT模板',      time:'2025-06-03 14:20', status:'done' },
+  { id:4, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'根据文档内容，帮我生成一份工作…', sub:'AI公文写作 · 3份文档',  time:'2025-06-03 11:05', status:'done' },
+  { id:5, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'帮我写一份关于新能源汽车的20…', sub:'深度研究报告',          time:'2025-06-02 17:30', status:'active' },
+  { id:6, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'每日摄入咖啡因对身体的影响报告', sub:'AI写作 · 2500字',      time:'2025-06-02 15:58', status:'done' },
+  { id:7, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'鱼油对身体的好处深度研究报告',   sub:'深度研究 · 引用14篇',  time:'2025-06-02 14:11', status:'done' },
+  { id:8, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'关于智慧城市建设的政策建议',     sub:'AI公文写作 · 1800字',  time:'2025-06-01 10:22', status:'done' },
+  { id:9, type:'write',   icon:'✍', color:'#F0FDF4', tc:'#16A34A', title:'员工绩效考核方案设计',          sub:'AI写作 · 模板生成',    time:'2025-05-31 09:45', status:'done' },
+  { id:10,type:'ppt',     icon:'▣', color:'#FFF1F2', tc:'#E11D48', title:'生成招聘岗位说明书PPT',         sub:'AI PPT · 18页',        time:'2025-05-30 16:00', status:'done' },
+];
+
+function renderHistoryPage(filter) {
+  const el = document.getElementById('history-page-list');
+  if (!el) return;
+  const items = filter ? historyItems.filter(h => h.type===filter) : historyItems;
+  if (!items.length) { el.innerHTML = '<div class="py-12 text-center text-sm text-gray-400">暂无记录</div>'; return; }
+  el.innerHTML = items.map(h => `
+    <div class="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 cursor-pointer group transition-all"
+         onclick="navigate('home')">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
+           style="background:${h.color};color:${h.tc};">${h.icon}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-gray-800 truncate">${h.title}</div>
+        <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-2">
+          <span>${h.sub}</span>
+          <span class="text-gray-300">·</span>
+          <span>${h.time}</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        ${h.status==='active'
+          ? '<span class="flex items-center gap-1 text-xs font-medium" style="color:var(--p);"><span class="w-1.5 h-1.5 rounded-full inline-block" style="background:var(--p);"></span>进行中</span>'
+          : '<span class="text-xs text-gray-400">已完成</span>'}
+        <button class="btn-g text-xs opacity-0 group-hover:opacity-100 px-2 py-1"
+                onclick="event.stopPropagation();showToast('info','已删除该条记录')">删除</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterHistory(btn, filter) {
+  btn.closest('.rounded-xl').querySelectorAll('button').forEach(b => {
+    b.style.background = 'transparent'; b.style.color = '#6B7280'; b.style.boxShadow = 'none';
+  });
+  btn.style.background = '#fff'; btn.style.color = 'var(--p)'; btn.style.boxShadow = '0 1px 3px rgba(0,0,0,.08)';
+  renderHistoryPage(filter === 'all' ? null : filter);
+}
+
+// ══════════════════════════════════════════════
+// FEATURE ROW SCROLL (hover left/right to auto-scroll)
+// ══════════════════════════════════════════════
+let featScrollTimer = null;
+
+function startFeatScroll(dir) {
+  stopFeatScroll();
+  const row = document.getElementById('feat-row');
+  if (!row) return;
+  featScrollTimer = setInterval(() => {
+    row.scrollLeft += dir * 3.5;
+    updateFeatScroll();
+    // Stop if we've hit the edge
+    const atEnd = dir > 0 && row.scrollLeft >= row.scrollWidth - row.clientWidth - 1;
+    const atStart = dir < 0 && row.scrollLeft <= 0;
+    if (atEnd || atStart) stopFeatScroll();
+  }, 16);
+}
+
+function stopFeatScroll() {
+  if (featScrollTimer) { clearInterval(featScrollTimer); featScrollTimer = null; }
+}
+
+function updateFeatScroll() {
+  const row = document.getElementById('feat-row');
+  const sl  = document.getElementById('feat-sl');
+  const sr  = document.getElementById('feat-sr');
+  if (!row || !sl || !sr) return;
+  const atStart = row.scrollLeft <= 1;
+  const atEnd   = row.scrollLeft >= row.scrollWidth - row.clientWidth - 1;
+  sl.classList.toggle('hide', atStart);
+  sr.classList.toggle('hide', atEnd);
+}
+
+// ══════════════════════════════════════════════
+// POLISH EDITOR PAGE
+// ══════════════════════════════════════════════
+function polishTool(tool) {
+  document.querySelectorAll('.pe-tool-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function rpTab(tab) {
+  ['polish','rewrite','expand','continue','shorten'].forEach(t => {
+    const el = document.getElementById('rpt-'+t);
+    if (el) el.classList.toggle('on', t===tab);
+  });
+}
+
+function toggleChip(btn) {
+  btn.classList.toggle('on');
+}
+
+function pickLength(btn) {
+  ['len-keep','len-short','len-long'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  btn.classList.add('on');
+}
+
+function runPolishEditor() {
+  const content = document.getElementById('rp-content').value.trim();
+  const docText = document.getElementById('polish-doc').innerText.substring(0, 200).trim();
+  const input = content || docText;
+  if (!input) { showToast('error','请先在文档中选中内容或在输入框中粘贴需要润色的文本'); return; }
+
+  const btnEl   = document.getElementById('rp-run-btn');
+  const procEl  = document.getElementById('rp-processing');
+  const procTxt = document.getElementById('rp-proc-txt');
+  const steps   = ['AI 正在润色中…','分析语言结构与文风…','优化表达，提升流畅度…','生成修改标注…'];
+  let si = 0;
+
+  btnEl.disabled = true;
+  btnEl.textContent = '润色中…';
+  procEl.classList.remove('hidden');
+
+  const stepTimer = setInterval(() => {
+    si = (si+1) % steps.length;
+    if (procTxt) procTxt.textContent = steps[si];
+  }, 1200);
+
+  setTimeout(() => {
+    clearInterval(stepTimer);
+    procEl.classList.add('hidden');
+    btnEl.disabled = false;
+    btnEl.textContent = '重新润色';
+
+    // Show result in document
+    const resultEl = document.getElementById('polish-doc-result');
+    const resultContent = document.getElementById('polish-doc-result-content');
+    if (resultEl && resultContent) {
+      resultContent.innerHTML = `
+        <p class="mb-4" style="text-indent:2em;line-height:2.2;">
+          <span class="d-del">中国式现代化关键在科技现代化，全面建成社会主义现代化强国关键看科技自立自强。</span>
+          <span class="d-add">科技现代化是中国式现代化的重要支柱，全面建成社会主义现代化强国，根本之道在于科技自立自强。</span>
+          为深入贯彻习近平新时代中国特色社会主义思想和党的二十大精神，深入实施科教兴国战略、人才强国战略、创新驱动发展战略，中共中央、国务院决定，<span class="d-del">对为我国科学技术进步、经济社会发展、国防现代化建设作出突出贡献的科学技术人员和组织给予奖励</span><span class="d-add">对在推动科学技术进步、促进经济社会发展、服务国防现代化建设中作出突出贡献的科学技术人员及组织予以表彰奖励</span>。
+        </p>
+        <p style="text-indent:2em;line-height:2.2;">
+          <span class="d-del">希望受到奖励的科学技术人员和组织，继续发扬科学精神，勇攀科技高峰，在建设科技强国、实现高水平科技自立自强上作出新的更大贡献。</span>
+          <span class="d-add">期望受到表彰的科学技术人员及相关组织，持续弘扬严谨求实的科学精神，奋勇攀登科技新高峰，在加快建设科技强国、推动实现高水平科技自立自强的伟大征程中再立新功、再创佳绩。</span>
+        </p>`;
+      resultEl.classList.remove('hidden');
+      resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+    showToast('success','润色完成，已在文档中标注修改位置');
+  }, 4500);
+}
+
+// ══════════════════════════════════════════════
+// ELEVATE DROPDOWN (homepage inline panel)
+// ══════════════════════════════════════════════
+function toggleElevatePanel() {
+  const panel = document.getElementById('elevate-drop');
+  const btn   = document.getElementById('elevate-toggle-btn');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    btn.classList.add('e-active');
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
+  } else {
+    panel.classList.add('hidden');
+    btn.classList.remove('e-active');
+    // reset state
+    document.getElementById('edrop-processing').classList.add('hidden');
+    document.getElementById('edrop-result').classList.add('hidden');
+    document.getElementById('edrop-example').classList.remove('hidden');
+    const eb = document.getElementById('edrop-btn');
+    eb.disabled = false;
+    eb.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg> 立即升华`;
+  }
+}
+
+function togglePill(btn, colorClass, label) {
+  const isOff = btn.classList.contains('off');
+  if (isOff) {
+    btn.classList.remove('off');
+    btn.classList.add(colorClass);
+    btn.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2 2 4.5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ${label}`;
+  } else {
+    btn.classList.remove(colorClass);
+    btn.classList.add('off');
+    btn.textContent = label;
+  }
+}
+
+function runElevateDrop() {
+  // Read from the main homepage dialog box
+  const input = document.getElementById('home-input').value.trim();
+  if (!input) { showToast('error','请先在对话框中输入或粘贴需要升华的内容'); return; }
+  // Check at least one source
+  const hasSource = ['ep-lx','ep-rj','ep-jd'].some(id => !document.getElementById(id).classList.contains('off'));
+  if (!hasSource) { showToast('error','请至少选择一项引用来源'); return; }
+
+  const procEl   = document.getElementById('edrop-processing');
+  const resultEl = document.getElementById('edrop-result');
+  const exampleEl= document.getElementById('edrop-example');
+  const btnEl    = document.getElementById('edrop-btn');
+  const procTxt  = document.getElementById('edrop-proc-txt');
+
+  btnEl.disabled = true;
+  btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" class="spin" fill="none" style="border:none"><path d="M7 1.5C4.5 1.5 2.5 3.5 2.5 5.8" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg> 升华中…`;
+  procEl.classList.remove('hidden');
+  exampleEl.classList.add('hidden');
+
+  const steps = [
+    { t:'正在解析文章主题与核心观点…', ms:800 },
+    { t:'检索儒家经典数据库，匹配语义相关引文…', ms:2200 },
+    { t:'智能嵌入引文，调整语句结构与格局…', ms:4000 },
+  ];
+  steps.forEach(s => setTimeout(() => { if(procTxt) procTxt.textContent = s.t; }, s.ms));
+
+  setTimeout(() => {
+    // build result HTML with diff
+    const resultTxt = input.length < 30
+      ? input
+      : input.substring(0, Math.floor(input.length * 0.6));
+    const suffix = input.length < 30 ? '' : input.substring(Math.floor(input.length * 0.6));
+
+    document.getElementById('edrop-result-content').innerHTML =
+      `<p class="text-sm leading-relaxed text-gray-800" style="line-height:2;">` +
+      resultTxt +
+      `<span class="quote-hl">《论语·子路》有云："名不正则言不顺，言不顺则事不成"</span>` +
+      suffix +
+      `</p>`;
+
+    document.getElementById('edrop-sources').innerHTML = `
+      <div class="flex items-start gap-3 p-3 rounded-xl" style="background:#FFFBEB;border:1px solid #FDE68A;">
+        <span class="text-xs font-bold px-2 py-0.5 rounded flex-shrink-0" style="background:#FEF3C7;color:#D97706;">儒家经典</span>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-gray-800">《论语·子路》</p>
+          <p class="text-xs text-gray-500 mt-0.5 leading-relaxed border-l-2 border-amber-300 pl-2 mt-1">
+            "名不正则言不顺，言不顺则事不成，事不成则礼乐不兴……"
+          </p>
+        </div>
+      </div>`;
+
+    procEl.classList.add('hidden');
+    resultEl.classList.remove('hidden');
+    exampleEl.classList.add('hidden');
+    btnEl.disabled = false;
+    btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1l1.8 4 4.2 1-3.1 2.8.7 4.2-3.6-2-3.6 2 .7-4.2L1 6z" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/></svg> 重新升华`;
+    resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 5200);
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pEl = document.getElementById('page-' + page);
+  if (pEl) pEl.classList.add('active');
+  // Sidebar: map feature pages to their closest sidebar nav item
+  const navMap = { home:'home', polish:'home', elevate:'home', layout:'home', templates:'home',
+    writing:'writing', research:'writing', ppt:'writing', meeting:'meeting',
+    style:'style', review:'review', proofread:'proofread', qa:'qa', reading:'home' };
+  const nId = 'nav-' + (navMap[page] || page);
+  const nEl = document.getElementById(nId);
+  if (nEl) nEl.classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'layout')    renderLayoutTpls();
+  if (page === 'templates') renderTplGrid();
+  if (page === 'home')      setTimeout(updateFeatScroll, 80);
+  if (page === 'history')   setTimeout(renderHistoryPage, 50);
+  if (page === 'knowledge') { setTimeout(renderMyKBs, 50); setTimeout(renderRecGrid, 50); }
+}
+
+// ══════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════
+function initChart() {
+  const canvas = document.getElementById('usage-chart');
+  if (!canvas) return;
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  chartInst = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['5/27','5/28','5/29','5/30','5/31','6/1','6/2'],
+      datasets: [
+        { label:'润色', data:[5,8,6,12,7,15,9],  backgroundColor:'#00A0DF', borderRadius:4, borderSkipped:false },
+        { label:'升华', data:[3,4,5,8,6,10,7],   backgroundColor:'#5BC8F0', borderRadius:4, borderSkipped:false },
+        { label:'排版', data:[2,3,2,5,4,6,4],    backgroundColor:'#B3E6F8', borderRadius:4, borderSkipped:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend:{display:false},
+        tooltip:{ backgroundColor:'#1F2937', titleFont:{family:'Inter',size:11}, bodyFont:{family:'Inter',size:11}, padding:8, cornerRadius:6 }
+      },
+      scales: {
+        x:{ grid:{display:false}, border:{display:false}, ticks:{font:{family:'Inter',size:11},color:'#9CA3AF'} },
+        y:{ grid:{color:'#F3F4F6'}, border:{display:false}, ticks:{font:{family:'Inter',size:11},color:'#9CA3AF',maxTicksLimit:5} }
+      },
+      barPercentage:0.7, categoryPercentage:0.8
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// POLISH
+// ══════════════════════════════════════════════
+const styleDescs = {
+  formal:     '<strong>正式文风：</strong>语言庄重严谨，逻辑清晰，避免口语化与情绪化，适合正式场合书面文件。',
+  official:   '<strong>公文文风：</strong>措辞严谨规范，结构层次分明，符合党政机关公文规范，行文简洁庄重。',
+  reporting:  '<strong>汇报文风：</strong>重点突出，数据翔实，表述客观，逻辑清晰，适合向上级汇报工作成果与计划。',
+  concise:    '<strong>精炼文风：</strong>去除冗余，提炼核心，每句言之有物，用最少的字传递最多的信息。',
+  expressive: '<strong>感染力文风：</strong>情感饱满，节奏有力，适当使用排比、比喻等修辞，增强感召力和表达张力。',
+  custom:     '<strong>自定义文风：</strong>根据您输入的提示词（最多 6 字）进行针对性润色。',
+};
+
+function pickStyle(btn, style) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  const wrap = document.getElementById('custom-style-wrap');
+  if (wrap) wrap.classList.toggle('hidden', style !== 'custom');
+  const desc = document.getElementById('style-desc');
+  if (desc) desc.innerHTML = styleDescs[style] || '';
+}
+
+function setPolishPanel(n) {
+  ['pp1','pp2','pp3'].forEach((id,i)=>document.getElementById(id).classList.toggle('hidden',i!==n-1));
+  const labels = ['输入与文风','AI 润色中','查看结果'];
+  const lEl = document.getElementById('p-step-label');
+  if (lEl) lEl.textContent = labels[n-1];
+  for (let i=1;i<=3;i++) {
+    const d = document.getElementById('p-s'+i);
+    d.className = 's-dot' + (i<n?' done':i===n?' on':'');
+    d.textContent = i<n ? '✓' : i;
+  }
+  for (let i=1;i<=2;i++) {
+    const l = document.getElementById('p-l'+i);
+    l.className = 's-line' + (i<n?' done':'');
+  }
+}
+
+function runPolish() {
+  const txt = document.getElementById('rp-content')?.value?.trim() || '';
+  if (!txt) { showToast('error','请先输入需要润色的文章内容'); return; }
+  setPolishPanel(2);
+  const steps = [
+    {w:'35%', t:'分析文章结构',    d:600},
+    {w:'55%', t:'检测语言问题',    d:1800},
+    {w:'75%', t:'生成润色方案',    d:3200},
+    {w:'92%', t:'逐句校对优化',    d:4800},
+    {w:'100%',t:'生成对比标注',    d:6000},
+  ];
+  steps.forEach(s=>setTimeout(()=>{
+    document.getElementById('pp-bar').style.width = s.w;
+    document.getElementById('pp-pct').textContent = s.w;
+    document.getElementById('pp-txt').textContent = s.t;
+  }, s.d));
+  setTimeout(()=>{
+    document.getElementById('pv-result-inner').innerHTML = POLISH_DIFF;
+    setPolishPanel(3);
+  }, 7000);
+}
+
+function pTab(tab) {
+  const tabs = ['compare','original','result'];
+  tabs.forEach(t => {
+    const btn = document.getElementById('pt-'+t);
+    const isActive = t===tab;
+    btn.style.background = isActive ? '#fff' : 'transparent';
+    btn.style.color = isActive ? 'var(--p)' : '#6B7280';
+    btn.style.boxShadow = isActive ? '0 1px 3px rgba(0,0,0,.08)' : 'none';
+  });
+  document.getElementById('pv-compare').style.display = tab==='compare' ? 'grid' : 'none';
+  document.getElementById('pv-original').style.display = tab==='original' ? 'block' : 'none';
+  document.getElementById('pv-result-only').style.display = tab==='result' ? 'block' : 'none';
+}
+
+// Custom style char counter
+document.getElementById('custom-style-txt').addEventListener('input', function() {
+  const n = [...this.value].length; // CJK-safe
+  document.getElementById('csc').textContent = n+'/6';
+  if (n>6) { this.value=[...this.value].slice(0,6).join(''); showToast('error','文风提示词最多 6 个汉字'); }
+});
+
+// ══════════════════════════════════════════════
+// ELEVATE
+// ══════════════════════════════════════════════
+const srcs = new Set(['learning','quote']);
+
+function toggleSrc(card, key) {
+  if (key==='classic') return;
+  const chk = document.getElementById('sc-chk-'+key);
+  if (srcs.has(key)) {
+    if (srcs.size<=1) { showToast('error','至少选择一个升华来源'); return; }
+    srcs.delete(key);
+    card.classList.remove('on');
+    chk.style.background='#fff'; chk.style.borderColor='#D1D5DB'; chk.innerHTML='';
+  } else {
+    srcs.add(key);
+    card.classList.add('on');
+    chk.style.background='var(--p)'; chk.style.borderColor='var(--p)';
+    chk.innerHTML='<svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1.5 4.5l2 2 4-4" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+}
+
+function setElevatePanel(n) {
+  ['ep1','ep2','ep3'].forEach((id,i)=>document.getElementById(id).classList.toggle('hidden',i!==n-1));
+  const labels = ['输入与来源','AI 升华中','查看结果'];
+  const lEl = document.getElementById('e-step-label');
+  if (lEl) lEl.textContent = labels[n-1];
+  for (let i=1;i<=3;i++) {
+    const d = document.getElementById('e-s'+i);
+    d.className = 's-dot' + (i<n?' done':i===n?' on':'');
+    d.textContent = i<n ? '✓' : i;
+  }
+  for (let i=1;i<=2;i++) {
+    document.getElementById('e-l'+i).className = 's-line' + (i<n?' done':'');
+  }
+}
+
+function runElevate() {
+  const txt = document.getElementById('elevate-input').value.trim();
+  if (!txt) { showToast('error','请先输入需要升华的文章内容'); return; }
+  if (srcs.size===0) { showToast('error','请至少选择一个升华来源'); return; }
+  setElevatePanel(2);
+  let subW = 65;
+  const timer = setInterval(()=>{
+    subW = Math.min(100, subW+7);
+    const b = document.getElementById('e-sub-bar');
+    if (b) b.style.width = subW+'%';
+    if (subW>=100) clearInterval(timer);
+  }, 500);
+  setTimeout(()=>{
+    document.getElementById('e-result-inner').innerHTML = ELEVATE_DIFF;
+    setElevatePanel(3);
+  }, 8000);
+}
+
+// ══════════════════════════════════════════════
+// LAYOUT & TEMPLATES
+// ══════════════════════════════════════════════
+function renderLayoutTpls() {
+  const el = document.getElementById('layout-tpl-list');
+  if (!el) return;
+  el.innerHTML = tpls.map((t,i)=>`
+    <div class="tpl-card cursor-pointer p-3.5 flex items-center gap-3 ${i===selTpl?'on':''}"
+         onclick="pickLayoutTpl(${i})">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+           style="background:${t.type==='word'?'#EFF6FF':'#FFF1F2'};">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M4 2h7.5L14 5.5V16H4V2z" stroke="${t.type==='word'?'#3B82F6':'#EF4444'}" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M11.5 2v4H14" stroke="${t.type==='word'?'#3B82F6':'#EF4444'}" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="text-sm font-medium text-gray-800 truncate">${t.name}</span>
+          ${t.isDefault?'<span class="badge" style="background:#FEF3C7;color:#D97706;font-size:10px;">默认</span>':''}
+        </div>
+        <div class="text-xs text-gray-400 truncate mt-0.5">${t.scene}</div>
+      </div>
+      ${i===selTpl?`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" fill="#00A0DF"/><path d="M5 8l2 2 4-4" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
+    </div>`).join('');
+}
+
+function pickLayoutTpl(i) {
+  selTpl = i;
+  document.getElementById('layout-tpl-name').textContent = tpls[i].name;
+  renderLayoutTpls();
+}
+
+function applyLayout() {
+  showToast('info','正在套用排版模板，请稍候…');
+  setTimeout(()=>showToast('success','排版完成！可在线预览或下载结果'), 2800);
+}
+
+function handleLayoutFile(input) {
+  if (input.files[0]) showToast('success',`文件「${input.files[0].name}」已选择`);
+}
+
+function renderTplGrid() {
+  const el = document.getElementById('tpl-grid');
+  if (!el) return;
+  el.innerHTML = tpls.map(t=>`
+    <div class="tpl-card">
+      <div class="h-32 flex items-center justify-center relative overflow-hidden"
+           style="background:${t.type==='word'?'#F0F4FF':'#FFF0F0'};">
+        ${t.type==='word'
+          ? `<div class="w-20 h-24 bg-white rounded shadow-md flex flex-col p-2 gap-1.5">
+               <div class="h-2 bg-gray-200 rounded w-full"></div>
+               <div class="h-1.5 bg-gray-100 rounded w-3/4"></div>
+               <div class="h-1 bg-gray-100 rounded w-full mt-1"></div>
+               <div class="h-1 bg-gray-100 rounded w-full"></div>
+               <div class="h-1 bg-gray-100 rounded w-5/6"></div>
+               <div class="h-1 bg-gray-100 rounded w-full mt-0.5"></div>
+               <div class="h-1 bg-gray-100 rounded w-2/3"></div>
+             </div>`
+          : `<div class="rounded shadow-md overflow-hidden" style="width:112px;height:72px;">
+               <div class="h-8 flex items-center justify-center" style="background:#00A0DF;">
+                 <div class="h-1.5 bg-white rounded opacity-80 w-16"></div>
+               </div>
+               <div class="flex-1 p-2 flex flex-col gap-1 bg-white" style="height:40px;">
+                 <div class="h-1.5 bg-gray-200 rounded w-full"></div>
+                 <div class="h-1 bg-gray-100 rounded w-3/4"></div>
+                 <div class="h-1 bg-gray-100 rounded w-5/6"></div>
+               </div>
+             </div>`}
+        ${t.isDefault?'<div class="absolute top-2 left-2 badge" style="background:rgba(255,255,255,.92);color:#D97706;font-size:10px;">默认</div>':''}
+        <div class="absolute top-2 right-2 badge uppercase"
+             style="background:rgba(255,255,255,.92);color:${t.type==='word'?'#3B82F6':'#EF4444'};font-size:10px;">${t.type}</div>
+      </div>
+      <div class="p-4">
+        <div class="text-sm font-semibold text-gray-900 truncate">${t.name}</div>
+        <div class="text-xs text-gray-500 mt-0.5 truncate">${t.scene}</div>
+        <div class="flex items-center justify-between mt-2.5 text-xs text-gray-400">
+          <span>${t.uses} 次套用</span><span>最近 ${t.lastUsed}</span>
+        </div>
+        <div class="text-xs text-gray-400 mt-0.5">${t.font}</div>
+        <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-1.5">
+          <button class="flex-1 btn-s text-xs py-1.5" onclick="navigate('layout');pickLayoutTpl(${tpls.indexOf(t)})">套用</button>
+          <button class="btn-g text-xs py-1.5 px-2.5" onclick="openEditModal()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M7.5 2.5L9.5 4.5 4 10H2V8l5.5-5.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn-g text-xs py-1.5 px-2.5 hover:text-red-500" onclick="showToast('success','模板已删除')">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 3.5h8M4.5 3.5V2h3v1.5M5 5.5v3.5M7 5.5v3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M2.5 3.5l.5 6.5h6l.5-6.5H2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// UPLOAD MODAL
+// ══════════════════════════════════════════════
+function openUploadModal() { document.getElementById('upload-modal').classList.add('show'); }
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.remove('show');
+  clearUploadFile();
+  document.getElementById('m-progress').classList.add('hidden');
+}
+function openEditModal() { document.getElementById('edit-modal').classList.add('show'); }
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('show'); }
+
+function handleUploadFile(input) {
+  if (!input.files[0]) return;
+  const f = input.files[0];
+  const ext = (f.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
+  if (!['.doc','.docx','.ppt','.pptx'].includes(ext)) {
+    showToast('error','仅支持 .doc .docx .ppt .pptx 格式'); return;
+  }
+  if (f.size > 100*1024*1024) {
+    showToast('error','单文件大小不能超过 100MB'); return;
+  }
+  document.getElementById('m-empty').classList.add('hidden');
+  document.getElementById('m-selected').classList.remove('hidden');
+  document.getElementById('m-fname').textContent = f.name;
+  document.getElementById('m-fsize').textContent = fmtSize(f.size);
+  document.getElementById('m-tname').value = f.name.replace(/\.[^.]+$/,'');
+}
+
+function clearUploadFile() {
+  document.getElementById('m-file').value = '';
+  document.getElementById('m-empty').classList.remove('hidden');
+  document.getElementById('m-selected').classList.add('hidden');
+  document.getElementById('m-progress').classList.add('hidden');
+  document.getElementById('m-prog-bar').style.width = '0%';
+}
+
+function submitUpload() {
+  const name = document.getElementById('m-tname').value.trim();
+  if (!name) { showToast('error','请填写模板名称'); return; }
+  document.getElementById('m-progress').classList.remove('hidden');
+  const steps = [
+    {w:'18%', t:'解析文档结构…',       d:'分析页眉页脚、多级标题',   ms:400},
+    {w:'40%', t:'提取字体段落格式…',   d:'字体、字号、行距、段距',    ms:1600},
+    {w:'65%', t:'复刻页面布局…',       d:'页边距、目录、编号样式',    ms:3000},
+    {w:'88%', t:'生成模板预览…',       d:'检查格式偏差（目标 ≤10%）', ms:4400},
+    {w:'100%',t:'保存成功 ✓',          d:'格式复刻偏差：3.2%',        ms:5800},
+  ];
+  steps.forEach(s=>setTimeout(()=>{
+    document.getElementById('m-prog-bar').style.width=s.w;
+    document.getElementById('m-prog-pct').textContent=s.w;
+    document.getElementById('m-prog-txt').textContent=s.t;
+    document.getElementById('m-prog-detail').textContent=s.d;
+  }, s.ms));
+  setTimeout(()=>{
+    closeUploadModal();
+    showToast('success',`模板「${name}」已保存，格式偏差 3.2%`);
+    if (document.getElementById('page-templates').classList.contains('active')) renderTplGrid();
+    if (document.getElementById('page-layout').classList.contains('active')) renderLayoutTpls();
+  }, 6800);
+}
+
+function fmtSize(b) {
+  if (b<1024) return b+'B';
+  if (b<1048576) return (b/1024).toFixed(1)+'KB';
+  return (b/1048576).toFixed(1)+'MB';
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+let toastTmr;
+function showToast(type, msg) {
+  const icons = {
+    success:`<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" fill="#10B981"/><path d="M5 7.5l2 2 3.5-3.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    error:  `<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" fill="#EF4444"/><path d="M5.5 5.5l4 4M9.5 5.5l-4 4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+    info:   `<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" fill="#00A0DF"/><path d="M7.5 6.5v4M7.5 5v.5" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  };
+  document.getElementById('t-icon').innerHTML = icons[type]||icons.info;
+  document.getElementById('t-msg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ══════════════════════════════════════════════
+// CLOSE MODALS ON OVERLAY CLICK
+// ══════════════════════════════════════════════
+document.getElementById('upload-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeUploadModal();});
+document.getElementById('edit-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEditModal();});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+navigate('home');
+</script>
+</body>
+</html>
