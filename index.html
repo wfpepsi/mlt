@@ -1942,8 +1942,11 @@
                 AI翻译
               </button>
 
+              <!-- Joined KB chips (回显已加入的知识库) -->
+              <div id="kb-toolbar-chips" class="flex items-center gap-1.5 flex-wrap"></div>
+
               <!-- Send -->
-              <button class="w-8 h-8 rounded-xl flex items-center justify-center text-white ml-auto transition-all"
+              <button class="w-8 h-8 rounded-xl flex items-center justify-center text-white ml-auto flex-shrink-0 transition-all"
                       style="background:var(--p);" onclick="showToast('info','请先输入问题')">
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                   <path d="M7.5 12V3M4 6.5l3.5-3.5 3.5 3.5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2382,15 +2385,31 @@ function renderRecGrid() {
 function joinKB(id) {
   joinedKBs.add(id);
   const kb = kbsData.find(k => k.id===id);
-  renderMyKBs(); renderRecGrid();
+  renderMyKBs(); renderRecGrid(); renderToolbarChips();
   showToast('success', `已加入「${kb?.name}」知识库`);
 }
 
 function leaveKB(id) {
   joinedKBs.delete(id);
   const kb = kbsData.find(k => k.id===id);
-  renderMyKBs(); renderRecGrid();
-  showToast('info', `已从「${kb?.name}」知识库移除`);
+  renderMyKBs(); renderRecGrid(); renderToolbarChips();
+  showToast('info', `已移除「${kb?.name}」知识库`);
+}
+
+function renderToolbarChips() {
+  const el = document.getElementById('kb-toolbar-chips');
+  if (!el) return;
+  const joined = [...joinedKBs].map(id => kbsData.find(k => k.id===id)).filter(Boolean);
+  if (!joined.length) { el.innerHTML = ''; return; }
+  el.innerHTML = joined.map(kb => `
+    <span class="flex items-center gap-1 pl-2 pr-1.5 py-1 rounded-lg text-xs font-medium transition-all"
+          style="background:${kb.bg};border:1px solid ${kb.color}22;color:${kb.color};">
+      <span style="font-size:11px;">${kb.icon}</span>
+      ${kb.name}
+      <button onclick="leaveKB('${kb.id}')"
+              style="border:none;background:none;cursor:pointer;padding:0;margin-left:1px;color:${kb.color};opacity:.6;line-height:1;font-size:11px;"
+              onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.6'">✕</button>
+    </span>`).join('');
 }
 
 function switchKBMainTab(tab) {
