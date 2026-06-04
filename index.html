@@ -26,13 +26,29 @@
     .page.active { display: block; }
     /* ── Sidebar nav ── */
     .nav-item {
-      display: flex; align-items: center; gap: 9px;
-      width: 100%; padding: 6px 11px; border-radius: 7px;
-      font-size: 13.5px; color: #6B7280; cursor: pointer;
-      transition: all .12s; border: none; background: none; text-align: left;
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 6px 10px; border-radius: 7px;
+      font-size: 13px; color: #64748B; cursor: pointer;
+      transition: background .1s, color .1s; border: none;
+      background: none; text-align: left; font-weight: 400;
+      letter-spacing: .01em; position: relative;
+      font-family: inherit;
     }
-    .nav-item:hover { background: #F3F4F6; color: #374151; }
-    .nav-item.active { background: var(--p-lt); color: var(--p); font-weight: 500; }
+    .nav-item:hover { background: #F1F5F9; color: #1E293B; }
+    .nav-item.active { background: rgba(0,160,223,.09); color: #005D8E; font-weight: 600; }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 2.5px; background: var(--p); border-radius: 0 2px 2px 0;
+    }
+    /* History items (bottom) */
+    .hist-item {
+      display: flex; align-items: center; gap: 5px;
+      width: 100%; padding: 4.5px 10px; border-radius: 6px;
+      font-size: 11.5px; color: #94A3B8; cursor: pointer;
+      transition: all .1s; border: none; background: none;
+      text-align: left; font-family: inherit;
+    }
+    .hist-item:hover { background: #F8FAFC; color: #475569; }
     /* ── Buttons ── */
     .btn-p {
       background: var(--p); color: #fff; border: none;
@@ -331,136 +347,159 @@
 <div class="flex min-h-screen">
 
   <!-- ─── SIDEBAR ─── -->
-  <aside class="w-[185px] bg-white border-r flex flex-col fixed h-full z-20" style="border-color:#EBEDF0;">
+  <aside class="flex flex-col fixed h-full z-20"
+         style="width:196px;background:#FAFBFC;border-right:1px solid #EAECF0;">
 
-    <!-- Logo -->
-    <div class="px-4 py-4 flex items-center gap-2">
-      <svg width="52" height="22" viewBox="0 0 52 22" fill="none">
-        <text x="0" y="17" font-family="Inter,-apple-system,sans-serif" font-size="17" font-weight="800" fill="#1A1A2E" letter-spacing="-0.5">midu</text>
-      </svg>
-      <span style="font-size:13.5px;font-weight:500;color:#3D3D4E;letter-spacing:.01em;">模力通</span>
-      <span style="margin-left:2px;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;background:#EBF5FF;color:#1677FF;">NEW</span>
+    <!-- ── Logo ── -->
+    <div class="flex items-center gap-2.5 px-5 py-5">
+      <div class="flex items-center justify-center rounded-xl flex-shrink-0"
+           style="width:30px;height:30px;background:linear-gradient(145deg,#00A0DF,#0073AF);box-shadow:0 2px 8px rgba(0,160,223,.35);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 11V3l2.5 3.5 2.5-2 2.5 2L12 3v8" stroke="#fff" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="flex flex-col leading-none">
+        <span style="font-size:14px;font-weight:700;color:#0F172A;letter-spacing:-.3px;">模力通</span>
+        <span style="font-size:9.5px;font-weight:500;color:#94A3B8;letter-spacing:.04em;margin-top:2px;">AI for easy work</span>
+      </div>
     </div>
 
-    <!-- Nav -->
-    <nav class="flex-1 px-2 overflow-y-auto flex flex-col">
-      <div class="flex-1">
-        <button class="nav-item active" id="nav-home" onclick="navigate('home')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <rect x="1.5" y="5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M1.5 7L7.5 2l6 5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-            <path d="M5.5 14v-4h4v4" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-          </svg>
-          AI 智能体
-        </button>
-        <button class="nav-item" id="nav-writing" onclick="navigate('writing')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <rect x="2" y="1.5" width="11" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M5 5h5M5 7.5h5M5 10h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          AI 公文写作
-        </button>
-        <button class="nav-item" id="nav-review" onclick="navigate('writing')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M5 7.5l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          AI 内容审校
-        </button>
-        <button class="nav-item" id="nav-proofread" onclick="navigate('writing')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <path d="M2.5 11.5l3-3 2.5 2.5 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M1.5 3.5h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          AI 公文校对
-        </button>
-        <button class="nav-item" id="nav-meeting" onclick="navigate('meeting')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <rect x="1.5" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M5 3V2M10 3V2M1.5 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
-          AI 会议纪要
-        </button>
-        <button class="nav-item" id="nav-qa" onclick="navigate('writing')">
-          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-            <path d="M13 7.5A5.5 5.5 0 112 7.5c0 1.5.6 2.9 1.6 3.9L2 13.5h5.5L9 11.1A5.5 5.5 0 0013 7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-            <path d="M6 5.5a1.5 1.5 0 013 .5c0 1-1.5 1.5-1.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            <circle cx="7.5" cy="10" r=".6" fill="currentColor"/>
-          </svg>
-          AI 知识中枢
-        </button>
+    <!-- ── Main nav (flex-1) ── -->
+    <nav class="flex-1 overflow-y-auto px-2.5" style="padding-bottom:8px;">
 
-        <!-- History section -->
-        <div class="flex items-center justify-between mt-3 mb-1 px-1">
-          <button class="nav-item flex-1 font-medium text-gray-700 px-2 py-1.5 text-xs"
-                  onclick="navigate('history')" style="font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8A9BB0;justify-content:space-between;">
-            <span class="flex items-center gap-1.5">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
-                <path d="M6 3.5v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
-              历史记录
-            </span>
-            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" class="text-gray-400">
-              <path d="M4 3l3 2.5-3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
+      <!-- Group label -->
+      <div style="font-size:10px;font-weight:600;letter-spacing:.08em;color:#CBD5E1;padding:4px 10px 6px;text-transform:uppercase;">功能</div>
 
-        <div class="space-y-0.5" id="history-list">
-          <button class="nav-item w-full flex items-center gap-1.5" style="font-size:12px;color:#5A6478;" onclick="navigate('home')">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;"></span>
-            <span class="flex-1 truncate text-left">关于加强基层治理工作的通知润色</span>
-          </button>
-          <button class="nav-item w-full flex items-center gap-1.5" style="font-size:12px;color:#5A6478;" onclick="navigate('home')">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;"></span>
-            <span class="flex-1 truncate text-left">2025年度工作总结报告升华改写</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">Q2季度汇报PPT排版套用</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">根据文档内容，帮我生成一份…</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">帮我写一份关于新能源汽车的…</span>
-          </button>
-          <button class="nav-item w-full flex items-center gap-1.5" style="font-size:12px;color:#5A6478;" onclick="navigate('home')">
-            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#10B981;"></span>
-            <span class="flex-1 truncate text-left">每日摄入咖啡因对身体的影响…</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">鱼油对身体的好处研究报告</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">关于智慧城市建设的政策建议</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">员工绩效考核方案设计</span>
-          </button>
-          <button class="nav-item w-full" style="font-size:12px;color:#5A6478;justify-content:flex-start;" onclick="navigate('home')">
-            <span class="truncate">生成招聘岗位说明书PPT</span>
-          </button>
+      <button class="nav-item" id="nav-home" onclick="navigate('home')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="1.5" y="4.5" width="11" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M1.5 6.5L7 2l5.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M5 13V9.5h4V13" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        AI 智能体
+      </button>
 
-          <!-- View all history -->
-          <button class="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-gray-50"
-                  style="color:#8A9BB0;" onclick="navigate('history')">
-            查看全部历史
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M4 2.5l2.5 2.5-2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+      <button class="nav-item" id="nav-writing" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="2" y="1.5" width="10" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 5h5M4.5 7.5h5M4.5 10h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 公文写作
+      </button>
+
+      <button class="nav-item" id="nav-review" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        AI 内容审校
+      </button>
+
+      <button class="nav-item" id="nav-proofread" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <path d="M2.5 10.5l2.5-2.5 2 2 4.5-4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1.5 3h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 公文校对
+      </button>
+
+      <button class="nav-item" id="nav-meeting" onclick="navigate('meeting')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M4.5 2.5V1.5M9.5 2.5V1.5M1.5 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        AI 会议纪要
+      </button>
+
+      <button class="nav-item" id="nav-qa" onclick="navigate('writing')">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.75;">
+          <path d="M12 6.5A5 5 0 112 6.5c0 1.4.55 2.65 1.45 3.6L2 13h5l1.2-2.1A5 5 0 0012 6.5z"
+                stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M5.5 5a2 2 0 012.5-.4A1.6 1.6 0 019 6c0 1.1-1.5 1.6-1.5 2.5"
+                stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="7.5" cy="10" r=".55" fill="currentColor"/>
+        </svg>
+        AI 知识中枢
+      </button>
+
     </nav>
 
-    <!-- Bottom actions -->
-    <div class="border-t p-2" style="border-color:#EBEDF0;">
+    <!-- ── History (bottom) ── -->
+    <div class="flex-shrink-0" style="border-top:1px solid #EEF0F4;">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-3.5 pt-3 pb-1.5">
+        <span style="font-size:10px;font-weight:600;letter-spacing:.08em;color:#CBD5E1;text-transform:uppercase;">最近使用</span>
+        <button onclick="navigate('history')"
+                style="font-size:10.5px;color:#94A3B8;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;"
+                onmouseover="this.style.color='#00A0DF'" onmouseout="this.style.color='#94A3B8'">
+          全部 ›
+        </button>
+      </div>
+
+      <!-- History items -->
+      <div class="px-2" style="max-height:186px;overflow-y:auto;">
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;margin-top:1px;"></span>
+          <span class="truncate">关于加强基层治理工作…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#00A0DF;margin-top:1px;"></span>
+          <span class="truncate">2025年度工作总结升华</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">Q2季度汇报PPT排版</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">根据文档内容帮我生成…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#10B981;margin-top:1px;"></span>
+          <span class="truncate">关于新能源汽车的研究…</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">每日咖啡因摄入影响报告</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">鱼油功效深度研究报告</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">智慧城市建设政策建议</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">员工绩效考核方案设计</span>
+        </button>
+        <button class="hist-item w-full" onclick="navigate('home')">
+          <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 opacity-0" style="margin-top:1px;"></span>
+          <span class="truncate">招聘岗位说明书PPT</span>
+        </button>
+      </div>
+
+      <!-- View all -->
+      <div class="px-2.5 py-2.5">
+        <button onclick="navigate('history')"
+                class="w-full flex items-center justify-center gap-1 py-1.5 rounded-lg transition-all"
+                style="font-size:11.5px;font-weight:500;color:#94A3B8;background:none;border:1px solid #EEF0F4;cursor:pointer;font-family:inherit;"
+                onmouseover="this.style.background='#F1F5F9';this.style.color='#475569'"
+                onmouseout="this.style.background='none';this.style.color='#94A3B8'">
+          查看全部历史记录
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M3.5 2.5L6.5 5l-3 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
     </div>
+
   </aside>
 
   <!-- ─── MAIN ─── -->
-  <main class="ml-[185px] flex-1 overflow-auto min-h-screen" style="background:#F5F7FA;">
+  <main class="ml-[196px] flex-1 overflow-auto min-h-screen" style="background:#F5F7FA;">
 
 
     <!-- ════════════════════════════════════
