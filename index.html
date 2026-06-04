@@ -1952,41 +1952,50 @@
             </div>
           </div>
 
-          <!-- ══ 我加入的 (above recommended) ══ -->
-          <div class="w-full mt-8" style="max-width:720px;">
-            <div class="flex items-center gap-2 mb-3">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="5" r="2.5" stroke="#374151" stroke-width="1.3"/>
-                <path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#374151" stroke-width="1.3" stroke-linecap="round"/>
-              </svg>
-              <span class="text-sm font-semibold text-gray-800">我加入的</span>
-              <span id="my-kbs-count" class="text-xs px-1.5 py-0.5 rounded-md font-medium"
-                    style="background:#E0F4FB;color:var(--p);">1</span>
-            </div>
-            <div class="flex flex-wrap gap-3" id="my-kbs-grid">
-              <!-- Rendered by JS -->
-            </div>
-          </div>
+          <!-- ══ 知识库 Tab 容器 ══ -->
+          <div class="w-full mt-7" style="max-width:740px;">
 
-          <!-- Divider -->
-          <div class="w-full mt-7 mb-1 flex items-center gap-3" style="max-width:720px;">
-            <div class="flex-1 h-px" style="background:#E2EAF4;"></div>
-          </div>
+            <!-- Tab bar -->
+            <div class="flex items-center border-b" style="border-color:#E8EBF0;">
+              <button id="kbt-mine" onclick="switchKBMainTab('mine')"
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all relative"
+                      style="color:var(--p);border-bottom:2.5px solid var(--p);margin-bottom:-1px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M2 12c0-2.2 2.02-4 4.5-4S11 9.8 11 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                我加入的
+                <span id="my-kbs-count"
+                      class="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style="background:var(--p);color:#fff;min-width:18px;text-align:center;font-size:10px;">1</span>
+              </button>
+              <button id="kbt-rec" onclick="switchKBMainTab('rec')"
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all"
+                      style="color:#9CA3AF;border-bottom:2.5px solid transparent;margin-bottom:-1px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M6.5 1l1.4 3.1 3.5.7-2.5 2.4.5 3.4L6.5 9l-2.9 1.6.5-3.4L1.6 4.8l3.5-.7z"
+                        stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                </svg>
+                推荐知识库
+                <span class="text-xs" style="color:#C4CAD4;">加入后可直接引用</span>
+              </button>
+            </div>
 
-          <!-- ══ 推荐知识库 ══ -->
-          <div class="w-full mt-5" style="max-width:720px;">
-            <div class="flex items-center gap-2 mb-4">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 1l1.6 3.5 3.9.8-2.8 2.7.6 3.9L7 10.4l-3.3 1.5.6-3.9L1.5 5.3l3.9-.8z"
-                      stroke="#374151" stroke-width="1.3" stroke-linejoin="round"/>
-              </svg>
-              <span class="text-sm font-semibold text-gray-800">推荐知识库</span>
-              <span class="text-xs text-gray-400 ml-1">加入后可在问答中直接引用</span>
+            <!-- Panel: 我加入的 -->
+            <div id="kbp-mine" class="pt-5 pb-4">
+              <div class="flex flex-wrap gap-3" id="my-kbs-grid">
+                <!-- Rendered by JS -->
+              </div>
             </div>
-            <div class="grid gap-3" id="rec-kbs-grid"
-                 style="grid-template-columns:repeat(4,1fr);">
-              <!-- Rendered by JS -->
+
+            <!-- Panel: 推荐知识库 -->
+            <div id="kbp-rec" class="hidden pt-5 pb-4">
+              <div class="grid gap-3" id="rec-kbs-grid"
+                   style="grid-template-columns:repeat(4,1fr);">
+                <!-- Rendered by JS -->
+              </div>
             </div>
+
           </div>
 
         </div>
@@ -2384,6 +2393,24 @@ function leaveKB(id) {
   const kb = kbsData.find(k => k.id===id);
   renderMyKBs(); renderRecGrid();
   showToast('info', `已从「${kb?.name}」知识库移除`);
+}
+
+function switchKBMainTab(tab) {
+  const isMine = tab === 'mine';
+  document.getElementById('kbp-mine').classList.toggle('hidden', !isMine);
+  document.getElementById('kbp-rec').classList.toggle('hidden', isMine);
+  const tMine = document.getElementById('kbt-mine');
+  const tRec  = document.getElementById('kbt-rec');
+  if (tMine) {
+    tMine.style.color       = isMine ? 'var(--p)' : '#9CA3AF';
+    tMine.style.fontWeight  = isMine ? '600' : '500';
+    tMine.style.borderBottomColor = isMine ? 'var(--p)' : 'transparent';
+  }
+  if (tRec) {
+    tRec.style.color      = !isMine ? 'var(--p)' : '#9CA3AF';
+    tRec.style.fontWeight = !isMine ? '600' : '500';
+    tRec.style.borderBottomColor = !isMine ? 'var(--p)' : 'transparent';
+  }
 }
 
 function toggleKBDrop(e) {
