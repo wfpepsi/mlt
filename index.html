@@ -1957,21 +1957,9 @@
 
             <!-- Tab bar -->
             <div class="flex items-center border-b" style="border-color:#E8EBF0;">
-              <button id="kbt-mine" onclick="switchKBMainTab('mine')"
-                      class="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all relative"
-                      style="color:var(--p);border-bottom:2.5px solid var(--p);margin-bottom:-1px;">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <circle cx="6.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/>
-                  <path d="M2 12c0-2.2 2.02-4 4.5-4S11 9.8 11 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                </svg>
-                我加入的
-                <span id="my-kbs-count"
-                      class="text-xs font-bold px-1.5 py-0.5 rounded-full"
-                      style="background:var(--p);color:#fff;min-width:18px;text-align:center;font-size:10px;">1</span>
-              </button>
               <button id="kbt-rec" onclick="switchKBMainTab('rec')"
-                      class="flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all"
-                      style="color:#9CA3AF;border-bottom:2.5px solid transparent;margin-bottom:-1px;">
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-all"
+                      style="color:var(--p);border-bottom:2.5px solid var(--p);margin-bottom:-1px;">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                   <path d="M6.5 1l1.4 3.1 3.5.7-2.5 2.4.5 3.4L6.5 9l-2.9 1.6.5-3.4L1.6 4.8l3.5-.7z"
                         stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
@@ -1979,19 +1967,31 @@
                 推荐知识库
                 <span class="text-xs" style="color:#C4CAD4;">加入后可直接引用</span>
               </button>
+              <button id="kbt-mine" onclick="switchKBMainTab('mine')"
+                      class="flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all"
+                      style="color:#9CA3AF;border-bottom:2.5px solid transparent;margin-bottom:-1px;">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M2 12c0-2.2 2.02-4 4.5-4S11 9.8 11 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                加入知识库
+                <span id="my-kbs-count"
+                      class="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                      style="background:#E5E7EB;color:#6B7280;min-width:18px;text-align:center;font-size:10px;">1</span>
+              </button>
             </div>
 
-            <!-- Panel: 我加入的 -->
-            <div id="kbp-mine" class="pt-5 pb-4">
-              <div class="flex flex-wrap gap-3" id="my-kbs-grid">
+            <!-- Panel: 推荐知识库 -->
+            <div id="kbp-rec" class="pt-5 pb-4">
+              <div class="grid gap-3" id="rec-kbs-grid"
+                   style="grid-template-columns:repeat(4,1fr);">
                 <!-- Rendered by JS -->
               </div>
             </div>
 
-            <!-- Panel: 推荐知识库 -->
-            <div id="kbp-rec" class="hidden pt-5 pb-4">
-              <div class="grid gap-3" id="rec-kbs-grid"
-                   style="grid-template-columns:repeat(4,1fr);">
+            <!-- Panel: 加入知识库 -->
+            <div id="kbp-mine" class="hidden pt-5 pb-4">
+              <div class="flex flex-wrap gap-3" id="my-kbs-grid">
                 <!-- Rendered by JS -->
               </div>
             </div>
@@ -2323,8 +2323,6 @@ function renderMyKBs() {
   const joined = [...joinedKBs].map(id => kbsData.find(k => k.id===id)).filter(Boolean);
   const total = 1 + joined.length; // 1 = 我的知识库
   if (countEl) countEl.textContent = total;
-
-  // 我的知识库 (always shown)
   const myCard = `
     <div class="kb-my-card mine" onclick="showToast('info','我的知识库：管理你上传的文档')">
       <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -2401,13 +2399,18 @@ function switchKBMainTab(tab) {
   document.getElementById('kbp-rec').classList.toggle('hidden', isMine);
   const tMine = document.getElementById('kbt-mine');
   const tRec  = document.getElementById('kbt-rec');
+  const cnt   = document.getElementById('my-kbs-count');
   if (tMine) {
-    tMine.style.color       = isMine ? 'var(--p)' : '#9CA3AF';
-    tMine.style.fontWeight  = isMine ? '600' : '500';
+    tMine.style.color = isMine ? 'var(--p)' : '#9CA3AF';
+    tMine.style.fontWeight = isMine ? '600' : '500';
     tMine.style.borderBottomColor = isMine ? 'var(--p)' : 'transparent';
   }
+  if (cnt) {
+    cnt.style.background = isMine ? 'var(--p)' : '#E5E7EB';
+    cnt.style.color = isMine ? '#fff' : '#6B7280';
+  }
   if (tRec) {
-    tRec.style.color      = !isMine ? 'var(--p)' : '#9CA3AF';
+    tRec.style.color = !isMine ? 'var(--p)' : '#9CA3AF';
     tRec.style.fontWeight = !isMine ? '600' : '500';
     tRec.style.borderBottomColor = !isMine ? 'var(--p)' : 'transparent';
   }
